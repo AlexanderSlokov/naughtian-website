@@ -14,6 +14,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: "Aleksandr Slokov's whitepapers",
+			customCss: ['./src/styles/custom.css'],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/AlexanderSlokov/whitepapers' }],
 			sidebar: [
 				{

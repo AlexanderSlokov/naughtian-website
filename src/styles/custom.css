@@ -1,0 +1,11 @@
+/* Justify text in standard markdown content, similar to scientific papers */
+.sl-markdown-content p,
+.sl-markdown-content li {
+  text-align: justify;
+}
+
+/* Fix MathJax inline math breaking to a new line */
+mjx-container:not([display="true"]) {
+  display: inline-block;
+  margin: 0;
+}
