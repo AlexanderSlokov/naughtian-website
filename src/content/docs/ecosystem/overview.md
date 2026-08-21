@@ -5,13 +5,24 @@ sidebar:
   order: 1
 ---
 
-Naughtian is a family of infrastructure tools built around a single conviction:
+Naughtian is a family of infrastructure tools built around two convictions.
 
-> **Infrastructure decisions should be written down before they are executed —
-> not reconstructed afterwards from a dashboard.**
+The first is about **how decisions are made**:
 
-Everything in the ecosystem is an application of that idea to a different layer
-of the stack.
+> Infrastructure decisions should be written down before they are executed —
+> not reconstructed afterwards from a dashboard.
+
+The second is about **what is allowed to sit at the bottom of a stack**:
+
+> The bottom layer must be something that, when it dies, nothing dies with it.
+
+The second is the load-bearing one, and it has its own page: [the day-2
+problem](/ecosystem/the-day-2-problem/). It argues that the previous generation
+of infrastructure tooling solved workload management and left control-plane
+management as an exercise for the reader — and that a system which must have
+quorum is structurally disqualified from being the foundation.
+
+Everything else here is an application of those two ideas to a different layer.
 
 ## The divide it addresses
 
@@ -72,6 +83,9 @@ working infrastructure, not a hostage situation.
 
 ## Where to go next
 
+- [The day-2 problem](/ecosystem/the-day-2-problem/) — the core argument: who
+  operates the operators, and why quorum disqualifies a system from being the
+  bottom layer.
 - [The stack](/ecosystem/stack/) — how the three tools compose in practice.
 - [Roadmap](/ecosystem/roadmap/) — what is real today and what is coming.
 - [Names and mythology](/ecosystem/naming/) — why a scheduler is named after a

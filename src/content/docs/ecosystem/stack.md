@@ -2,7 +2,7 @@
 title: The stack
 description: How Kuberina, Helvilette and Kallisto compose, and where the boundaries between them sit.
 sidebar:
-  order: 2
+  order: 3
 ---
 
 The three tools operate at different layers and do not depend on each other.
@@ -89,5 +89,7 @@ an API that Vault already speaks.
 |---|---|
 | Expensive GPU nodes sitting at 30% utilisation while pods go unschedulable | [Kuberina](/kuberina/) |
 | Config drift across VMs, and SSH keys concentrated on one laptop or CI server | [Helvilette](/helvilette/) |
+| Your services stalling every time Vault is sealed, failing over or upgrading | [Kallisto](/kallisto/) |
 | Vault getting hammered at every rollout, or `.env` files lying around on disk | [Kallisto](/kallisto/) |
+| Nobody owning the question of who operates Vault and Consul themselves | [The day-2 problem](/ecosystem/the-day-2-problem/) first |
 | Needing to justify a placement decision to someone who will challenge it | [Kuberina](/kuberina/) plus the [paper](/research/kuberina-stowage-scheduling/) |

@@ -2,7 +2,7 @@
 title: Names and mythology
 description: Where the names in the Naughtian ecosystem come from.
 sidebar:
-  order: 3
+  order: 4
 ---
 
 Every name in this ecosystem comes from a saga the author has been writing

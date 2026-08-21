@@ -2,7 +2,7 @@
 title: Roadmap
 description: What is real today across the Naughtian ecosystem, and what is planned.
 sidebar:
-  order: 4
+  order: 5
 ---
 
 :::danger[Read the maturity column before deploying anything]

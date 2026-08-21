@@ -20,8 +20,10 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## The stack
 
-Three tools, three layers, one idea: infrastructure decisions should be written
-down before they are executed, not discovered afterwards in a dashboard.
+Three tools, three layers. Decisions get written down before they are executed
+rather than reconstructed from a dashboard afterwards — and nothing in the
+foundation is allowed to take the rest of the system down with it when it
+fails.
 
 <CardGrid>
 	<Card title="Kuberina" icon="seti:kubernetes">
@@ -41,12 +43,30 @@ down before they are executed, not discovered afterwards in a dashboard.
 	</Card>
 	<Card title="Kallisto" icon="seti:lock">
 		**Secret delivery for the request path.** A node-local cache in front of
-		your existing Vault or OpenBao, speaking the KV-v2 API. Adopting it is one
-		environment variable. So is removing it.
+		your existing Vault or OpenBao, speaking the KV-v2 API. Your request path
+		keeps working while Vault is sealed, failing over, or mid-upgrade.
+		Adopting it is one environment variable. So is removing it.
 
 		[Overview](/kallisto/) · [Tutorial](/kallisto/tutorials/quickstart/)
 	</Card>
 </CardGrid>
+
+## Why this exists
+
+The previous generation of infrastructure tooling solved workload management
+and quietly left control-plane management as an exercise for the reader. Vault
+manages your secrets — who manages Vault? Consul discovers your services — who
+keeps its quorum healthy?
+
+**Every control plane needs a control plane.** And anything that must have
+quorum is structurally disqualified from being the bottom of the stack, because
+losing a vote means the whole thing stops.
+
+<LinkCard
+	title="The day-2 problem"
+	description="The core argument: who operates the operators, why quorum disqualifies a system from being the foundation, and what Naughtian does and does not solve."
+	href="/ecosystem/the-day-2-problem/"
+/>
 
 ## Where each one sits
 

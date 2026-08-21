@@ -24,6 +24,23 @@ The **controlplane** runs the fleet — pushing invalidations, warming caches
 before a rollout, and reporting how much plaintext is resident across every
 node.
 
+## The point is availability, not throughput
+
+Kallisto is easy to mistake for a performance optimisation. The sharper reason
+to run it is that **your request path survives Vault being unavailable.**
+
+Vault starts sealed after every restart. Raft failover means a leader election.
+An upgrade means a careful step-down. Each of those is a window in which
+everything that depends on Vault is stalled — and unlike a slow query, a failed
+secret read usually means a process cannot start at all.
+
+With reads terminating on the local node, that window stops being an outage. A
+hard dependency on a quorum-bound system becomes a soft one.
+
+The throughput argument is real as well — no stampede against the root of trust
+when five hundred pods start at once — but it is the smaller half. See [the
+day-2 problem](/ecosystem/the-day-2-problem/) for the full reasoning.
+
 ## Adoption is one line
 
 Kallisto is compatible with the Vault KV-v2 API:

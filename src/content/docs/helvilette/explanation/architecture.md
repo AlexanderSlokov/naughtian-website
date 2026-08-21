@@ -118,6 +118,34 @@ cannot perform surgery on its own brain.
 A control plane cannot be the thing that heals its own control plane. Something
 underneath it has to be.
 
+### Why Helvilette is eligible to be that thing
+
+Sitting at Layer 2 is necessary but not sufficient. What actually qualifies a
+component to be the foundation is its failure mode.
+
+**Nothing here votes.** There is no Raft group, no quorum, and therefore no
+number of failures that stops the service outright. Agents hold their state
+locally and reconcile against Git; Othela dispatches work but is not in the
+critical path of a node continuing to function.
+
+Compare the failure modes:
+
+| | When it fails |
+|---|---|
+| Consul loses quorum | Service discovery stops; dependent applications break immediately |
+| Vault is sealed | Every secret read fails; anything fetching at boot cannot start |
+| Othela is unreachable | Agents keep their last known state and receive no new work |
+
+The first two **fail hard**, and not because they are badly built — they must
+be strongly consistent, consistency requires quorum, and quorum means a
+failure threshold that stops everything. That is the correct trade for what
+they do, and it is exactly what disqualifies them from being underneath
+everything else.
+
+This argument is developed in full in [the day-2
+problem](/ecosystem/the-day-2-problem/), including what Naughtian does *not*
+solve — Othela is still a service someone has to run, with no HA story today.
+
 ## Scope boundaries
 
 The project is explicit about what it will not become:

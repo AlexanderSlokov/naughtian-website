@@ -65,6 +65,7 @@ export default defineConfig({
 					label: 'The ecosystem',
 					items: [
 						{ label: 'What is Naughtian?', link: '/ecosystem/overview/' },
+						{ label: 'The day-2 problem', link: '/ecosystem/the-day-2-problem/' },
 						{ label: 'The stack', link: '/ecosystem/stack/' },
 						{ label: 'Names and mythology', link: '/ecosystem/naming/' },
 						{ label: 'Roadmap', link: '/ecosystem/roadmap/' },

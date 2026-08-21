@@ -5,20 +5,47 @@ sidebar:
   order: 2
 ---
 
-Kallisto has three stated purposes. Each is a different shape of the same
+The project states three purposes; they are set out below as four, because the
+first one bundles two arguments of very different weight. Each is a shape of
+the same
 underlying idea: secrets should be available where they are needed, at the
 moment they are needed, without a network round trip to the root of trust.
 
-## 1. A cache layer for a root of trust
+## 1. Surviving an unavailable root of trust
 
-The primary case. Serve secrets from an upstream secret management system in a
-fast, scalable way, right at the node level — **without self-DDoS-ing your own
-infrastructure**.
+The case that justifies the component, and the one most easily mistaken for a
+performance feature.
 
-That last phrase names a real failure mode. Central Vault deployments fall over
-during rollouts, when hundreds of pods start simultaneously and each fetches
-its secrets at once. The load is bursty, correlated, and arrives precisely when
-the system is least able to absorb it, because a deploy is already in progress.
+A quorum-bound secret store has scheduled and unscheduled windows where it
+serves nothing:
+
+- **After every restart, Vault is sealed** until someone or something unseals
+  it. Shamir shares mean waking up humans; auto-unseal means a dependency on a
+  KMS that may be in the region that is down.
+- **Raft failover** means a leader election, during which writes stop and reads
+  may too.
+- **An upgrade** means a deliberate, careful step-down across the cluster.
+
+A failed secret read is rarely graceful. A slow database query degrades a
+response; a process that cannot fetch its credentials does not start at all. So
+those windows do not degrade your system — they stop it.
+
+With a node-local dataplane answering reads, the window stops being an outage.
+This is **decoupling availability**: converting a hard dependency on a
+consensus-bound system into a soft one.
+
+That is the real pitch, and it is the same argument the whole ecosystem rests
+on — see [the day-2 problem](/ecosystem/the-day-2-problem/).
+
+## 2. A cache layer that stops the stampede
+
+The throughput half. Serve secrets from an upstream system in a fast, scalable
+way at the node level — **without self-DDoS-ing your own infrastructure**.
+
+That names a real failure mode. Central Vault deployments fall over during
+rollouts, when hundreds of pods start simultaneously and each fetches its
+secrets at once. The load is bursty, correlated, and arrives precisely when the
+system is least able to absorb it, because a deploy is already in progress.
 
 A node-local cache flattens the burst. The first read on a node reaches
 upstream; the rest are answered locally.
@@ -28,7 +55,7 @@ per request rather than at boot, which means a rotated secret takes effect
 without a restart — and plaintext stops living in long-lived process memory for
 weeks at a time.
 
-## 2. Secure secret storage in standalone mode
+## 3. Secure secret storage in standalone mode
 
 Kallisto can run standalone, storing key/value pairs and encrypting data before
 writing it to persistent storage.
@@ -44,10 +71,10 @@ system to fall back on. With no authentication on the data port, no TLS and no
 encryption barrier, standalone mode today offers less protection than the
 `.env` file it replaces.
 
-Of the three use cases, this is the one to defer until the security work lands.
+Of the four, this is the one to defer until the security work lands.
 :::
 
-## 3. A secure edge config server
+## 4. A secure edge config server
 
 Provide shared TLS certificates, API keys and similar material to an API
 gateway or load balancer fleet at the edge.
