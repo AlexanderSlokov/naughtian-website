@@ -1,0 +1,110 @@
+---
+title: Kuberina
+description: Offline, pre-deployment scheduling for heterogeneous Kubernetes clusters, using maritime stowage optimisation.
+---
+
+import { Card, CardGrid, LinkCard, Badge } from '@astrojs/starlight/components';
+
+<p>
+	<Badge text="Alpha" variant="caution" size="medium" />
+	<Badge text="AGPLv3" variant="note" size="medium" />
+	<Badge text="Rust solver" variant="tip" size="medium" />
+</p>
+
+Kuberina is a CLI tool that uses maritime stowage optimisation mathematics to
+generate pre-deployment scheduling blueprints for heterogeneous Kubernetes
+clusters.
+
+Inspired by how supercomputers solve the stowage planning problem for *MSC
+Irina*, it applies combinatorial optimisation to pack pods tightly into
+non-standard infrastructure — mixed CPU, RAM and GPU — **before** you run them.
+
+## The problem
+
+The default `kube-scheduler` is built to make dynamic decisions in
+milliseconds. It works by seeing an empty spot and putting something in it.
+On expensive heterogeneous clusters, that greedy behaviour produces severe
+resource fragmentation: industry analyses consistently report cloud
+environments running at only 30–40% CPU utilisation.
+
+Worse, the decision is invisible. When Node 7 hits 98% CPU while Node 12 sits
+at 15%, nobody can explain why — the reasoning was never written down.
+
+## The approach
+
+Kuberina does not race the clock. It is a **static planning** tool: it spends
+seconds solving a Constraint Satisfaction Problem and a multi-dimensional bin
+packing problem, and emits an optimal blueprint you can read.
+
+```text
+kuberina plan → blueprint.yaml          # seconds
+
+# Team review:
+"Move Loki to Node 4, it's stressing frontend disk I/O."
+"Rejected — Node 4 has Redis, kernel tuning conflict. Add a rule instead."
+
+kuberina plan → blueprint-v2.yaml
+# Repeat until consensus.
+
+kubectl apply -f blueprint-final.yaml   # Peer-reviewed. Mathematically grounded.
+```
+
+Git brought reviewable diffs to code. Terraform brought `plan` to
+infrastructure. Kuberina brings the same to Kubernetes scheduling.
+
+## Core features
+
+<CardGrid>
+	<Card title="Maritime-inspired CSP engine" icon="approve-check">
+		Applies the stowage planning model to cloud computing, minimising
+		fragmentation and resource waste.
+	</Card>
+	<Card title="Heterogeneous-first" icon="puzzle">
+		Understands the difference between ordinary nodes, GPU nodes (A100, T4)
+		and memory-optimised nodes. Cold cargo always lands in the right socket.
+	</Card>
+	<Card title="Zero-touch" icon="setting">
+		Runs entirely offline. Never interferes with a running cluster and never
+		slows down `kube-apiserver`.
+	</Card>
+	<Card title="Auto-injected constraints" icon="document">
+		Takes plain configuration as input and writes `nodeSelector`,
+		`podAffinity`, `podAntiAffinity` and tolerations into the output YAML.
+	</Card>
+</CardGrid>
+
+## Results
+
+On a synthetic benchmark of 186 nodes, 2,714 pods and 5,128 affinity
+constraints, Kuberina reports 100% scheduling success with zero constraint
+violations, consolidating onto 152 of 186 nodes — an 18.3% node reduction — at
+88.7% average CPU utilisation, with an approximation ratio of α = 1.34 against
+the LP lower bound, in under 44 seconds.
+
+The full derivation, methodology and Monte Carlo significance testing are in
+[the paper](/research/kuberina-stowage-scheduling/).
+
+## Start here
+
+<CardGrid>
+	<LinkCard
+		title="Generate your first blueprint"
+		description="Build the solver and run it against the bundled homelab dataset."
+		href="/kuberina/tutorials/first-blueprint/"
+	/>
+	<LinkCard
+		title="Why offline scheduling"
+		description="The argument for planning placement before deployment rather than during it."
+		href="/kuberina/explanation/offline-scheduling/"
+	/>
+	<LinkCard
+		title="CLI reference"
+		description="The plan subcommand and its flags, as implemented today."
+		href="/kuberina/reference/cli/"
+	/>
+	<LinkCard
+		title="Licensing roadmap"
+		description="AGPLv3 now, SSPLv1 on incorporation, Apache 2.0 eventually — the full terms."
+		href="/kuberina/reference/licensing/"
+	/>
+</CardGrid>

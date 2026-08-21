@@ -1,23 +1,86 @@
 ---
-title: Welcome to Aleksandr Slokov's whitepapers
-description: Collection of my science papers that I wrote in free time. Just a hobby.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Naughtian
+description: An ecosystem of infrastructure tools for the 80% who never got a Kubernetes control plane.
+template: splash
 hero:
-  tagline: Who TF are you?
+  tagline: Infrastructure tooling for everyone who never got a control plane. Offline scheduling, pull-based delivery, and secrets on the request path.
   image:
     file: ../../assets/helvilette.webp
   actions:
-    - text: I am Helvilette, trust me bro!
-      link: https://github.com/AlexanderSlokov
+    - text: What is Naughtian?
+      link: /ecosystem/overview/
       icon: right-arrow
+    - text: Read the research
+      link: /research/
+      icon: open-book
+      variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## What can I share with you?
+## The stack
 
-<CardGrid stagger>
-	<Card title="Universal Scientific Paper Template" icon="open-book">
-    <a href="/references/white_paper_universal_template">My template for writing a scientific research paper</a>
+Three tools, three layers, one idea: infrastructure decisions should be written
+down before they are executed, not discovered afterwards in a dashboard.
+
+<CardGrid>
+	<Card title="Kuberina" icon="seti:kubernetes">
+		**Offline scheduling for heterogeneous Kubernetes.** Reformulates pod
+		placement as multi-dimensional bin packing, borrowed from how mega-vessel
+		shipping lines stow containers. Produces a reviewable blueprint instead of
+		an opaque runtime decision.
+
+		[Overview](/kuberina/) · [Tutorial](/kuberina/tutorials/first-blueprint/) · [Paper](/research/kuberina-stowage-scheduling/)
+	</Card>
+	<Card title="Helvilette" icon="seti:config">
+		**Pull-based GitOps delivery for Ansible.** Agents pull playbooks from Git
+		and reconcile at the systemd layer. One last SSH session to install it,
+		then port 22 closes forever.
+
+		[Overview](/helvilette/) · [Tutorial](/helvilette/tutorials/quickstart/)
+	</Card>
+	<Card title="Kallisto" icon="seti:lock">
+		**Secret delivery for the request path.** A node-local cache in front of
+		your existing Vault or OpenBao, speaking the KV-v2 API. Adopting it is one
+		environment variable. So is removing it.
+
+		[Overview](/kallisto/) · [Tutorial](/kallisto/tutorials/quickstart/)
 	</Card>
 </CardGrid>
+
+## Where each one sits
+
+Naughtian is deliberately layered. Kuberina decides *where workloads go* before
+anything runs. Helvilette keeps *the machines underneath* converged on their
+desired state. Kallisto serves *the secrets those workloads need* without a
+round trip to the root of trust.
+
+<LinkCard
+	title="The stack, layer by layer"
+	description="How the three tools compose, what each one deliberately does not do, and where the boundaries sit."
+	href="/ecosystem/stack/"
+/>
+
+## Research
+
+Design decisions here are argued in public before they are implemented. The
+whitepapers carry the mathematics, the benchmarks, and the reasoning.
+
+<CardGrid>
+	<LinkCard
+		title="Kuberina: Maritime Stowage-Inspired Combinatorial Optimization"
+		description="The full paper — problem formulation, the three-phase FFD/GA/CSP pipeline, and results on a 186-node, 2,714-pod benchmark."
+		href="/research/kuberina-stowage-scheduling/"
+	/>
+	<LinkCard
+		title="Whitepaper template"
+		description="The interview-question framework used to write every paper in this collection."
+		href="/research/whitepaper-template/"
+	/>
+</CardGrid>
+
+## Also coming
+
+**Kalena**, **Kaeliir** and **Ginnungagap** are in the works and will appear
+here as they become real. Names come from the same saga as the rest — see
+[names and mythology](/ecosystem/naming/).

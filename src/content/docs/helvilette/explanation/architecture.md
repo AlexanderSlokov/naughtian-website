@@ -1,0 +1,136 @@
+---
+title: Architecture
+description: How Helvilette maps onto Kubernetes concepts, transposed down to the systemd layer.
+sidebar:
+  order: 1
+---
+
+Helvilette's design is not "inspired by" Kubernetes in a vague sense. It maps
+onto Kubernetes concept for concept, transposed from the container layer down
+to the OS and systemd layer.
+
+That correspondence is the whole design thesis: the reconciliation model
+Kubernetes proved works for containers also works for machines, and you should
+not need a Kubernetes cluster to benefit from it.
+
+## The mapping
+
+| Kubernetes concept | Helvilette equivalent | Role |
+|---|---|---|
+| `kube-apiserver` | **Othela** (control plane) | Receives declarations, dispatches jobs to agents |
+| `kubelet` | **Helvilette Agent** | Sits on each node, pulls, executes, reports |
+| OCI image | **Ansible playbook repo** | Artifact containing execution logic |
+| Container registry | **Git server** | Artifact storage |
+| `Dockerfile` | **`playbook.yml` + `roles/`** | Defines what needs to be done |
+| `values.yaml` (Helm) | **`helvilette.yml`** | Per-deployment declarative configuration |
+| Pod spec / `nodeSelector` | **`nodeGroup` / `nodeSelector`** | Declares what runs where |
+| `livenessProbe` | **`livenessProbe`** | Identical concept, applied to systemd services |
+| Container runtime | **Ansible engine** | The actual executor |
+| `etcd` | **SQLite / Git** | State storage |
+
+## Othela
+
+Othela is the control plane. Internally it comprises `helvilette-api-server`,
+`helvilette-exec-manager` and `helvilette-controller-manager` — again mirroring
+the Kubernetes control plane's decomposition.
+
+Its job is narrow: accept declarations, match agent labels against
+`nodeSelector` rules, and hand back job specifications containing a Git repo
+reference and any `extra_vars`.
+
+Critically, **Othela never initiates a connection to an agent.** It has no
+credentials for the nodes it manages and no route to reach them. Every
+connection is outbound from the agent.
+
+The name is from [the saga](/ecosystem/naming/): Othela is one of the twelve
+long-term-operating Agents of Helvilette, acting as the apiserver for his
+living-Kubernetes-like system.
+
+## The agent
+
+A single Go binary, around 20MB of RAM, running as a systemd service. It runs
+on ARM64, so a Raspberry Pi is a legitimate target and edge deployment is in
+scope rather than aspirational.
+
+Its loop:
+
+1. Register with Othela, sending `nodeID` and labels.
+2. Poll for work at the configured interval.
+3. Receive a job: a Git repository reference plus `extra_vars`.
+4. Clone or pull the playbook repository into its workspace.
+5. Run `ansible-playbook` with `ANSIBLE_STDOUT_CALLBACK=json` and the supplied
+   variables.
+6. Capture the structured JSON output and report the result back.
+
+Then repeat, forever. Drift is corrected because the loop never stops, not
+because anything detected a specific change.
+
+## The bootstrap
+
+There is a chicken-and-egg problem in any pull-based system: something has to
+install the puller.
+
+Helvilette resolves it by using Ansible itself, exactly once:
+
+```text
+Last SSH session ever:
+┌──────────────────────────────────────────┐
+│  ansible-playbook install-helvilette.yml │
+│                                          │
+│  → Installs agent on N servers           │
+│  → Agent registers with Othela           │
+│  → systemd enable + start                │
+│                                          │
+│  Done. Close port 22. Forever.           │
+└──────────────────────────────────────────┘
+```
+
+Ansible installs the machine that delivers all future Ansible. The chicken lays
+the egg-making machine, then retires.
+
+## The immune system layer
+
+Helvilette operates beneath Kubernetes, beneath container runtimes, beneath
+everything:
+
+```text
+Layer 4:  ┌─ Kubernetes ───────────────────────────┐
+          │  Pods, Deployments, Services           │
+          │  ❌ Cannot self-heal                   │
+Layer 3:  ├─ Container Runtime (containerd) ───────┤
+          │  ❌ Cannot self-restart                │
+Layer 2:  ├─ systemd ──────────────────────────────┤
+          │  kubelet.service, containerd.service   │
+          │  etcd.service, kube-apiserver.service  │
+Layer 1:  ├─ OS (Linux) ───────────────────────────┤
+          │                                        │
+          │  🐈‍⬛ Helvilette Agent lives here.       │
+          │  It is a systemd service.              │
+          │  It can see EVERYTHING above.          │
+          └────────────────────────────────────────┘
+```
+
+This position grants a capability the upper layers structurally cannot have:
+**managing the managers.** Helvilette can rolling-update `kubelet`, restart
+`kube-apiserver`, and repair what Kubernetes cannot repair — because Kubernetes
+cannot perform surgery on its own brain.
+
+A control plane cannot be the thing that heals its own control plane. Something
+underneath it has to be.
+
+## Scope boundaries
+
+The project is explicit about what it will not become:
+
+**In scope** — desired-state reconciliation at the OS and systemd level;
+pull-based GitOps without inbound SSH; a lightweight agent suitable for edge
+and IoT.
+
+**Out of scope** — container orchestration (that is Kubernetes or Swarm);
+general-purpose CI/CD pipelines (GitHub Actions, GitLab CI); core configuration
+management (Ansible already does this); infrastructure provisioning (Terraform
+or Pulumi).
+
+The last one matters most. Helvilette *delivers* Ansible; it does not replace
+it. Remove Helvilette and you still have working playbooks and Git repos, with
+no proprietary DSL to migrate off.

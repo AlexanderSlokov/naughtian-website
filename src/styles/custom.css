@@ -1,0 +1,76 @@
+/* ---------------------------------------------------------------------------
+   Naughtian documentation — site styles
+   --------------------------------------------------------------------------- */
+
+/* Fix MathJax inline math breaking onto a new line. */
+mjx-container:not([display='true']) {
+	display: inline-block;
+	margin: 0;
+}
+
+/* Long formulae should scroll inside their own box rather than forcing the
+   whole page to scroll sideways. */
+mjx-container[display='true'] {
+	overflow-x: auto;
+	overflow-y: hidden;
+	max-width: 100%;
+	padding-block: 0.25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Research papers
+   --------------------------------------------------------------------------- */
+
+/* Justified text suits a paper but hurts a how-to guide, where ragged-right is
+   easier to scan. Pages opt in via the `head` frontmatter rather than this
+   being applied site-wide. */
+.paper-actions {
+	margin-block: 2rem;
+}
+
+.paper-pdf-link {
+	display: inline-block;
+	padding: 0.75rem 1.5rem;
+	border: 1px solid var(--sl-color-accent);
+	border-radius: 0.5rem;
+	background-color: var(--sl-color-accent);
+	color: var(--sl-color-white);
+	font-weight: 600;
+	text-decoration: none;
+	box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
+	transition:
+		background-color 0.15s ease,
+		transform 0.15s ease;
+}
+
+.paper-pdf-link:hover {
+	background-color: var(--sl-color-accent-high);
+	transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------------------------
+   Tables
+   --------------------------------------------------------------------------- */
+
+/* Several pages carry wide mapping tables. Let them scroll in place so the page
+   body never scrolls horizontally. */
+.sl-markdown-content table {
+	display: block;
+	overflow-x: auto;
+	max-width: 100%;
+	white-space: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   ASCII diagrams
+   --------------------------------------------------------------------------- */
+
+/* The layer maps and pipeline diagrams are alignment-sensitive; never let them
+   wrap. */
+.sl-markdown-content pre {
+	overflow-x: auto;
+}
+
+.sl-markdown-content pre code {
+	white-space: pre;
+}

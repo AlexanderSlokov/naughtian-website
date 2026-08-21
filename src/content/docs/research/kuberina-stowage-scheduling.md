@@ -1,8 +1,17 @@
 ---
-title: "Kuberina: Maritime Stowage-Inspired Combinatorial Optimization"
+title: "Kuberina: Maritime Stowage-Inspired Combinatorial Optimization for Pre-deployment Scheduling in Heterogeneous Kubernetes Clusters"
+description: Reformulating Kubernetes pod scheduling as multi-dimensional bin packing, via a structural isomorphism with the Container Stowage Planning Problem.
+tableOfContents:
+  maxHeadingLevel: 3
+sidebar:
+  label: "Kuberina: Stowage-Inspired Scheduling"
+  order: 2
+head:
+  - tag: style
+    content: |
+      .sl-markdown-content p,
+      .sl-markdown-content li { text-align: justify; }
 ---
-
-# Kuberina: Maritime Stowage-Inspired Combinatorial Optimization for Pre-deployment Scheduling in Heterogeneous Kubernetes Clusters
 
 > **Authors:** _Dinh Tan Dung (ORCID: https://orcid.org/0009-0003-1374-7525)_
 >
@@ -10,13 +19,13 @@ title: "Kuberina: Maritime Stowage-Inspired Combinatorial Optimization"
 >
 > **Date:** _26th July 2026_
 
----
-
-<div style="margin: 2rem 0;">
-  <a href="/pdfs/kuberina_paper.pdf" target="_blank" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: var(--sl-color-accent); color: var(--sl-color-text-invert); text-decoration: none; border-radius: 0.5rem; font-weight: 600; border: 1px solid var(--sl-color-accent); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-   &nbsp;View Original PDF Version
+<div class="paper-actions">
+  <a class="paper-pdf-link" href="/pdfs/kuberina_paper.pdf" target="_blank" rel="noopener">
+    View original PDF version
   </a>
 </div>
+
+---
 
 ## Abstract
 

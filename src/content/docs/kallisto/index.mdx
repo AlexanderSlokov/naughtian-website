@@ -1,0 +1,111 @@
+---
+title: Kallisto
+description: A high-performance secret cache that sits between your workloads and your root of trust.
+---
+
+import { Card, CardGrid, LinkCard, Badge } from '@astrojs/starlight/components';
+
+<p>
+	<Badge text="Prototype" variant="danger" size="medium" />
+	<Badge text="AGPLv3" variant="note" size="medium" />
+	<Badge text="Rust 2024" variant="tip" size="medium" />
+</p>
+
+**Secret delivery for the request path.**
+
+Naughtian Kallisto is a high-performance cache for secrets, sitting between
+your workloads and your root of trust.
+
+The **dataplane** runs on every node and answers secret reads locally, so your
+API gateway, worker nodes and CI runners can fetch secrets *per request*
+instead of once at boot.
+
+The **controlplane** runs the fleet — pushing invalidations, warming caches
+before a rollout, and reporting how much plaintext is resident across every
+node.
+
+## Adoption is one line
+
+Kallisto is compatible with the Vault KV-v2 API:
+
+```diff
+- VAULT_ADDR=https://vault.internal:8200
++ VAULT_ADDR=https://localhost:8200
+```
+
+Removing it is the same line. That symmetry is deliberate — nothing here should
+be hard to back out of.
+
+:::danger[Prototype. Do not run this where it matters.]
+Working today: the KV-v2 read/write path, the cuckoo cache, CLOCK eviction.
+
+**Not built yet:** authentication on the data port, TLS, the encryption
+barrier, and the entire controlplane.
+
+See [project status](/kallisto/reference/status/) before going near a
+production system.
+:::
+
+## It sits in front of a root of trust, not instead of one
+
+Kallisto is designed to integrate with **existing** secret management systems —
+HashiCorp Vault, OpenBao, Infisical, Conjur. This is an intentional design
+decision that avoids taking on the security responsibilities of being a root of
+trust.
+
+**Do not** use Kallisto as a drop-in replacement for your Vault or OpenBao
+infrastructure. It offers a similar API surface and contract, but it cannot and
+should not serve as your upstream secret management platform.
+
+## Use cases
+
+<CardGrid>
+	<Card title="Cache layer for a root of trust" icon="rocket">
+		Serve secrets from an upstream system quickly and at scale, right at the
+		node, without your own infrastructure DDoS-ing your Vault at every
+		rollout.
+	</Card>
+	<Card title="Secure secret storage" icon="approve-check">
+		In standalone mode, store key/value pairs encrypted before they hit
+		persistent storage — so your workloads can use secrets without `.env`
+		files lying around on disk.
+	</Card>
+	<Card title="Secure edge config server" icon="setting">
+		Provide shared TLS certificates and API keys to an API gateway or load
+		balancer fleet at the edge.
+	</Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+	<LinkCard
+		title="Run Kallisto with Docker"
+		description="Get a server answering KV-v2 requests in a couple of minutes."
+		href="/kallisto/tutorials/quickstart/"
+	/>
+	<LinkCard
+		title="Build from source"
+		description="Core CLI build, server build, and the local development setup."
+		href="/kallisto/how-to/build-from-source/"
+	/>
+	<LinkCard
+		title="Run the benchmarks"
+		description="k6 and wrk2 harnesses for validating throughput and latency."
+		href="/kallisto/how-to/run-benchmarks/"
+	/>
+	<LinkCard
+		title="Project status"
+		description="What works, what does not, and the versioning warnings that come with it."
+		href="/kallisto/reference/status/"
+	/>
+</CardGrid>
+
+## A note on this documentation
+
+Kallisto maintains its own documentation site in its repository under `docs/`,
+built with Hugo and already organised along Diátaxis lines. The pages here
+cover the essentials; the deeper material — ADRs, benchmark archives,
+internals, telemetry — has not yet been migrated into this site. See
+[documentation status](/kallisto/reference/status/#documentation) for what
+lives where.

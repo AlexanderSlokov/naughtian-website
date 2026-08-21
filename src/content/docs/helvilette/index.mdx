@@ -1,0 +1,128 @@
+---
+title: Helvilette
+description: Declarative, pull-based GitOps continuous delivery for Ansible playbooks.
+---
+
+import { Card, CardGrid, LinkCard, Badge } from '@astrojs/starlight/components';
+
+<p>
+	<Badge text="Alpha" variant="caution" size="medium" />
+	<Badge text="Apache 2.0" variant="note" size="medium" />
+	<Badge text="Go" variant="tip" size="medium" />
+</p>
+
+Helvilette is a declarative GitOps continuous delivery tool for Ansible. It uses
+**your** existing playbooks to manage desired state across a fleet of nodes — a
+lightweight alternative to wiring Ansible into a push-based CI pipeline, at
+scale or at the edge.
+
+> *"Use SSH for Ansible to install Helvilette once. Then never need SSH for
+> Ansible again."*
+
+## The problem
+
+For the roughly 80% of organisations without a Kubernetes control plane — SMBs,
+universities, government agencies, homelabs running 5 to 50 VMs — the standard
+"make Ansible runnable from CI" path is a maze:
+
+```text
+Playbook ready
+    │
+    ├─► Push to Git
+    ├─► Configure GitHub Actions / GitLab CI
+    ├─► Setup SSH keys in CI secrets
+    ├─► Open port 22 (or hack a bastion host / VPN tunnel)
+    ├─► Write CI pipeline YAML calling ansible-playbook
+    ├─► Debug why the CI runner can't SSH into some nodes
+    ├─► 4 hours scratching your head + 4 more for a post-mortem
+    │
+    ▼
+Server maybe configured???
+```
+
+Every step is glue work. Nobody enjoys it and nobody excels at it. Worse, the
+push model forces a security anti-pattern: every SSH root key concentrated on
+one laptop or one CI server. Laptop stolen, whole infrastructure compromised.
+Engineer leaves, infrastructure knowledge walks out with them.
+
+## The approach
+
+Helvilette deletes the delivery pipeline entirely:
+
+```text
+Playbook ready
+    │
+    ├─► Push to Git repo
+    ▼
+Othela notifies and sets Job specs
+    │
+    ▼
+Agent polls → Agent clones → Agent runs ansible-playbook → Agent reports back
+```
+
+Agents pull. Nothing needs inbound SSH. Ansible installs Helvilette in one last
+SSH session, and then port 22 can close for good.
+
+## Key features
+
+<CardGrid>
+	<Card title="Pull-based GitOps" icon="git-branch">
+		Agents pull playbooks from Git. No inbound SSH access required, no keys
+		concentrated on a CI server.
+	</Card>
+	<Card title="Reconciliation loop" icon="random">
+		Continuous drift detection and self-healing at the OS and systemd level,
+		not just at deploy time.
+	</Card>
+	<Card title="Lightweight agent" icon="rocket">
+		A single Go binary using around 20MB of RAM. Runs on a Raspberry Pi
+		(ARM64), so edge and IoT are in scope.
+	</Card>
+	<Card title="Kubernetes-familiar config" icon="document">
+		`helvilette.yml` uses `apiVersion`, `kind`, `metadata`, `spec`,
+		`nodeSelector` and probe conventions you already know.
+	</Card>
+	<Card title="Zero lock-in" icon="open-book">
+		Remove Helvilette and you still have working Ansible playbooks and Git
+		repos. There is no proprietary DSL to escape from.
+	</Card>
+	<Card title="Structured reporting" icon="list-format">
+		Agents capture Ansible's JSON output and report execution results back to
+		the control plane.
+	</Card>
+</CardGrid>
+
+## Managing the managers
+
+Helvilette runs at Layer 2 — systemd — beneath Kubernetes, beneath the
+container runtime, beneath everything. That position grants it a capability the
+layers above cannot have: it can rolling-update `kubelet`, restart
+`kube-apiserver`, and heal what Kubernetes cannot heal, because Kubernetes
+cannot perform surgery on its own brain.
+
+See [architecture](/helvilette/explanation/architecture/) for the full mapping.
+
+## Start here
+
+<CardGrid>
+	<LinkCard
+		title="Run Othela and an agent locally"
+		description="Two terminals, one reconciliation loop — the fastest way to see it work."
+		href="/helvilette/tutorials/quickstart/"
+	/>
+	<LinkCard
+		title="helvilette.yml reference"
+		description="Every field in the declarative manifest."
+		href="/helvilette/reference/helvilette-yml/"
+	/>
+	<LinkCard
+		title="Agent configuration"
+		description="CLI flags, environment variables and the kubelet-style YAML config file."
+		href="/helvilette/reference/agent-configuration/"
+	/>
+	<LinkCard
+		title="Why pull-based"
+		description="The security and operational argument against push-based delivery."
+		href="/helvilette/explanation/why-pull-based/"
+	/>
+</CardGrid>

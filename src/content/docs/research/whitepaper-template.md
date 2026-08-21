@@ -1,6 +1,14 @@
 ---
 title: White Paper Universal Template
 description: A template for writing a scientific research paper.
+sidebar:
+  label: Whitepaper template
+  order: 3
+head:
+  - tag: style
+    content: |
+      .sl-markdown-content p,
+      .sl-markdown-content li { text-align: justify; }
 ---
 
 ### Uploaded: 10th of August, 2026
