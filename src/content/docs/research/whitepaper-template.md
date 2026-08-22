@@ -3,7 +3,7 @@ title: White Paper Universal Template
 description: A template for writing a scientific research paper.
 sidebar:
   label: Whitepaper template
-  order: 3
+  order: 4
 head:
   - tag: style
     content: |

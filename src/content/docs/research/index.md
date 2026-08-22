@@ -36,6 +36,27 @@ The tool it describes is [Kuberina](/kuberina/). For the shorter version of the
 argument, see [the maritime
 isomorphism](/kuberina/explanation/maritime-isomorphism/).
 
+### [Operator Experience as a First-Class Design Constraint](/research/operator-experience/) — *draft*
+
+Argues that Operator Experience — the cost, borne by a human, of understanding
+and correcting a system's behaviour under time pressure — is decided by
+architecture rather than by documentation, and can therefore be treated as a
+design input.
+
+Applies the constraint in two directions: **reflexive**, whether a tool is
+cheap to operate itself, and **assistive**, whether it lowers the operating
+cost of the incumbent platform it sits alongside. The second is what
+distinguishes the position from a critique.
+
+This is the theoretical umbrella over [the day-2
+problem](/ecosystem/the-day-2-problem/), which states the same argument in the
+form the rest of the ecosystem answers.
+
+:::note[In progress]
+Currently a section skeleton rather than a paper. It is published early because
+the argument benefits from being visible while it is still arguable.
+:::
+
 ## Method
 
 ### [Whitepaper template](/research/whitepaper-template/)
