@@ -72,8 +72,14 @@ go run ./cmd/agent \
   --poll-interval=5s
 ```
 
-The agent registers with Othela, sending its `nodeId` and labels, then begins
+The agent registers with Othela, sending its `nodeID` and labels, then begins
 polling every five seconds.
+
+:::tip[Not sure a setting took effect?]
+Add `--print-config` to that command and the agent prints the configuration it
+resolved, naming the source of each value, then exits without starting. See
+[configure the agent](/helvilette/how-to/configure-the-agent/#confirming-which-mechanism-won).
+:::
 
 ## Step 4: Watch the cycle
 

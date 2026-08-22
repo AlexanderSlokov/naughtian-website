@@ -9,18 +9,17 @@ The agent supports Kubernetes-style configuration through three mechanisms.
 When the same setting appears in more than one, later sources overwrite earlier
 ones in this order:
 
-**defaults → YAML config file → environment variables → CLI flags**
+**defaults → environment variables → YAML config file → CLI flags**
 
 CLI flags win over everything. Defaults apply only when nothing else sets a
 value.
 
-:::caution[The README states a different order]
-The upstream README documents precedence as *"CLI flags > YAML config >
-Environment variables > Defaults"*, which would put the config file above
-environment variables. The implementation in `cmd/agent/main.go` applies the
-config file first and then lets environment variables override it, so the real
-order is the one above. Trust the code, not the README.
-:::
+The one ordering that surprises people: the **config file beats environment
+variables**, which is the opposite of the viper/12-factor convention and the
+same way k3s resolves it. The reasoning is in [why the config file outranks the
+environment](/helvilette/explanation/config-precedence/); the short version is
+that a file you can read is easier to debug at 3am than a variable you cannot
+see.
 
 ## Using CLI flags
 
@@ -46,6 +45,11 @@ export AGENT_LABELS=role=edge-proxy,env=production
 ./bin/agent
 ```
 
+Note that this is the **weakest** of the three mechanisms. Environment
+variables fill in whatever the config file leaves unset, but they will not
+override a value the file sets. To override a config file at runtime — in a pod
+spec, say — use `args:`, which are CLI flags.
+
 ## Using a config file
 
 Best for managed fleets — this is the mechanism that "tastes like" kubelet.
@@ -67,16 +71,49 @@ Then point the agent at it:
 ./bin/agent --config=/var/lib/helvilette/agent.yaml
 ```
 
-:::danger[The README's example uses wrong key names]
-The upstream README shows `otherlaUrl` and `nodeId`. Neither is what the parser
-reads. `AgentConfiguration` in `cmd/agent/main.go` declares the keys as
-`othelaURL` and `nodeID` — note the capitalised `URL` and `ID`.
+Key names are case-sensitive: `othelaURL` and `nodeID`, with capitalised `URL`
+and `ID`. An unrecognised key is rejected at startup, so a typo fails
+immediately and visibly rather than leaving the agent running on defaults.
 
-Because unrecognised keys are simply ignored rather than rejected, copying the
-README's example gives you an agent that silently falls back to the defaults
-`http://localhost:8080/api/v1` and `agent-01`. If your agent is trying to reach
-localhost when you configured a remote Othela, this is why.
-:::
+## Confirming which mechanism won
+
+Once more than one mechanism is in play, the useful question is not "what does
+the precedence table say?" but "what is *this* node actually using?".
+`--print-config` answers it directly — it resolves the configuration, prints
+each value with the source that supplied it, and exits without starting the
+agent:
+
+```console
+$ ./bin/agent --config=/var/lib/helvilette/agent.yaml --print-config
+othelaURL    = http://othela-server:8080/api/v1  source=config-file
+nodeID       = node-01                           source=config-file
+pollInterval = 5s                                source=default
+workspaceDir = /var/lib/helvilette/workspace     source=config-file
+labels.owner = sre                               source=env(AGENT_LABELS)
+labels.role  = edge-proxy                        source=config-file
+```
+
+Run it the same way you run the agent — same unit file, same container, same
+environment — or the answer describes a different situation than the one you
+are debugging.
+
+**If the agent is talking to the wrong Othela**, this is the first thing to
+check. `source=default` on `othelaURL` means nothing you wrote was read at all:
+a config file that was never passed with `--config`, a path that does not
+exist, or a variable exported in a different shell than the one that started
+the agent. `source=env(OTHELA_URL)` when you expected the file means the file
+does not set that key — check the spelling of `othelaURL`.
+
+**If a node registers under an unexpected identity**, look at `nodeID`. A
+source of `default(hostname)` means nothing configured it and the machine's
+hostname was used; `agent-unknown` means even the hostname was unavailable.
+Either way, set `nodeID` explicitly.
+
+The agent logs the same resolution at startup under the message `effective
+configuration`, so you can also answer the question after the fact from a
+node's logs. See the [configuration
+reference](/helvilette/reference/agent-configuration/#inspecting-the-resolved-configuration)
+for the full vocabulary of source names.
 
 ## Choosing labels
 
@@ -111,5 +148,8 @@ steady load on Othela proportional to fleet size divided by interval.
 
 - [Agent configuration reference](/helvilette/reference/agent-configuration/) —
   every setting in table form.
+- [Why the config file outranks the
+  environment](/helvilette/explanation/config-precedence/) — the reasoning
+  behind the precedence order above.
 - [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — the other
   half of the targeting equation.
