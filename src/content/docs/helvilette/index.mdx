@@ -79,8 +79,9 @@ SSH session, and then port 22 can close for good.
 		(ARM64), so edge and IoT are in scope.
 	</Card>
 	<Card title="Kubernetes-familiar config" icon="document">
-		`helvilette.yml` uses `apiVersion`, `kind`, `metadata`, `spec`,
-		`nodeSelector` and probe conventions you already know.
+		`helvilette.yml` uses the `apiVersion`, `kind`, `metadata`, `spec` and
+		`nodeSelector` conventions you already know, and is validated on load so
+		a bad manifest fails loudly instead of deploying to nobody.
 	</Card>
 	<Card title="Zero lock-in" icon="open-book">
 		Remove Helvilette and you still have working Ansible playbooks and Git

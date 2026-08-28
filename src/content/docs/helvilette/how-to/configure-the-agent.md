@@ -129,7 +129,10 @@ Label along the axes you will actually want to target:
 
 Getting this wrong is the most common reason an agent sits idle while you
 expect it to be doing something. If a node is not picking up a job, compare its
-labels against the `nodeSelector` before looking anywhere else.
+labels against the `nodeSelector` before looking anywhere else — [diagnose a
+manifest that deploys
+nothing](/helvilette/how-to/diagnose-a-silent-manifest/) walks the full
+checklist.
 
 ## Tuning the poll interval
 
@@ -153,3 +156,6 @@ steady load on Othela proportional to fleet size divided by interval.
   behind the precedence order above.
 - [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — the other
   half of the targeting equation.
+- [Diagnose a manifest that deploys
+  nothing](/helvilette/how-to/diagnose-a-silent-manifest/) — when the labels
+  look right and the agent still gets no work.
