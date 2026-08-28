@@ -24,7 +24,7 @@ not need a Kubernetes cluster to benefit from it.
 | `Dockerfile` | **`playbook.yml` + `roles/`** | Defines what needs to be done |
 | `values.yaml` (Helm) | **`helvilette.yml`** | Per-deployment declarative configuration |
 | Pod spec / `nodeSelector` | **`nodeGroup` / `nodeSelector`** | Declares what runs where |
-| `livenessProbe` | **`livenessProbe`** | Identical concept, applied to systemd services |
+| `livenessProbe` | **`livenessProbe`** *(planned)* | Identical concept, applied to systemd services. Declared in example manifests but [not yet parsed](/helvilette/reference/helvilette-yml/#not-yet-implemented) |
 | Container runtime | **Ansible engine** | The actual executor |
 | `etcd` | **SQLite / Git** | State storage |
 
