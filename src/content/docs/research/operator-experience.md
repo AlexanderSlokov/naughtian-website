@@ -66,12 +66,20 @@ improves only its own OpX has optimised a system nobody was struggling with.
 *Written last. Context → the gap → the proposal → the evidence → the
 implication, in 150–250 words.*
 
+For the Naughtian stack, we introduce a new design priority: Operator Experience (OpX).
+OpX is the day-0 through day-n experience of an SRE/infra engineer running the tool.
+When a design call is contested, break the tie on operator cost — especially
+the *cost of diagnosing a problem under pressure*, not the cost of the happy path.
+This favours approaches with visible/explicit sources over invisible/ambient ones;
+fail loudly at startup over silently degrading to defaults; and defaults that 
+contain blast radius rather than collide fleet-wide.  
+
 ---
 
 ## 1. Introduction
 
-*The funnel: from "infrastructure software is operated by humans under
-pressure" down to the specific claim above.*
+*"infrastructure software is operated by humans under
+pressure"*
 
 - **Opening.** Why the operator's cost is an engineering quantity and not a
   matter of temperament.

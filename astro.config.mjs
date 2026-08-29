@@ -53,6 +53,16 @@ export default defineConfig({
 			title: 'Naughtian',
 			description:
 				'An ecosystem of infrastructure tools for the 80% who never got a Kubernetes control plane: offline scheduling, pull-based delivery, and secret caching.',
+			locales: {
+				root: {
+					label: 'English',
+					lang: 'en'
+				},
+				vi: {
+					label: 'Tiếng Việt',
+					lang: 'vi'
+				}
+			},
 			customCss: ['./src/styles/custom.css'],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/AlexanderSlokov' },
