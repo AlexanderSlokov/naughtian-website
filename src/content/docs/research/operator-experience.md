@@ -237,33 +237,20 @@ direction, and there is no counterweight pushing back.
 *The definitional contribution. This section has to make OpX something that can
 be argued about rather than merely asserted.*
 
-- **4.1. Diagnosis cost.** A definition sharp enough to compare two designs.
-  See the Vietnamese draft, which is ahead of this one and should be
-  back-translated here rather than re-derived.
-- **4.2. The properties that drive it.** Candidate axes to be argued and pruned:
-  visibility of state, explicitness of artifacts, self-explanation of failure,
-  blast radius of a single mistake, and the number of systems that must be
-  healthy for the answer to be obtainable. To this list the operational rules in
-  §5 add a sixth: whether diagnosis remains possible when the control plane is
-  the thing that is down.
-- **4.3. The asymmetry principle.** When two designs both "work", the one whose
-  failure mode points at its own cause is strictly cheaper, and the difference
-  is largest exactly when the operator is least able to pay it. Worked through
-  the [configuration precedence
-  decision](/helvilette/explanation/config-precedence/), where the two
-  directions of an identical conflict differ by an order of magnitude in cost
-  to diagnose.
-- **4.4. A ladder, not a gate.** OpX does not *demand* operator skill; it
-  *rewards* it. The default mode of a well-designed tool asks almost nothing of
-  its user — receiving a report of what has diverged requires far less skill
-  than detecting the divergence by hand. Higher tiers unlock with competence.
-  The distinction is not cosmetic: describing such a tool as
-  "skill-oriented" repels precisely the segment identified in §3.5, whose
-  members most need the bottom rung, while the operators who already have the
-  skill generally already have a platform.
-- **4.5. What OpX is not.** Not ease of installation; not the quality of the
-  documentation; not the absence of complexity; and not the absence of danger —
-  see the argument for escape hatches in §5.1.
+### 4.1. Diagnosis cost
+Diagnosis cost is proposed as the core metric of OpX. It provides a definition sharp enough to quantify and compare the effectiveness of two different system designs, focusing on the effort required to identify the root cause when a failure occurs.
+
+### 4.2. The properties that shape OpX
+Multiple design properties directly affect this cost. They include the visibility of state, the explicitness of artifacts, and the self-explanatory nature of system failures. Furthermore, the blast radius of a single configuration mistake and the number of dependent systems that must remain healthy for successful diagnosis are also key factors that must be considered and optimised. To this list, the operational rules in §5 add another: whether diagnosis remains possible when the control plane itself is down.
+
+### 4.3. The asymmetry principle
+The asymmetry principle asserts that when two designs are both functioning normally, their operational costs appear comparable. However, a design that can self-identify its core cause during a failure will have a strictly lower diagnosis cost. This difference becomes profoundly stark in emergency situations, when the operator has the least time and resources to spare. This is clearly illustrated by the [configuration precedence decision](/helvilette/explanation/config-precedence/), where two approaches to the same configuration conflict yield diagnosis costs that differ by an order of magnitude.
+
+### 4.4. A ladder, not a gate
+OpX does not *demand* operator skill; it *rewards* it. The default mode of a well-designed tool asks almost nothing of its user — receiving a report of what has diverged requires far less skill than detecting the divergence by hand. Higher tiers unlock with competence. The distinction is not cosmetic: describing such a tool as "skill-oriented" repels precisely the segment identified in §3.5, whose members most need the bottom rung, while the operators who already have the skill generally already have a platform.
+
+### 4.5. What OpX is not
+To understand the nature of OpX, it is necessary to clarify what falls outside its scope. OpX is not merely the ease of initial installation, it does not stop at the quality of documentation, and it is certainly not synonymous with the absence of system complexity. Nor is it the absence of danger — see the argument for escape hatches in §5.1. Instead, OpX focuses on the ability to manage and control that complexity over the course of long-term operation.
 
 ---
 
@@ -520,29 +507,20 @@ it is silent.
 *The day-2 problem, stated as the constraint it imposes on anything proposing
 to sit at the bottom of a stack.*
 
-- **6.1. Every control plane needs a control plane.** The regress, and why most
-  tooling declares the bottom of the stack out of scope. Builds on [the day-2
-  problem](/ecosystem/the-day-2-problem/).
-- **6.2. Quorum as a disqualifier.** Strong consistency requires quorum; quorum
-  implies a failure threshold that stops everything. Correct for what Consul
-  and Vault do, and precisely what makes them ineligible to be underneath
-  everything else.
-- **6.3. The eligibility criteria.** What a component must give up to be
-  foundational, and what it may keep. The operational floor established in §5
-  supplies several of these directly: local diagnosis without the control plane,
-  a single-command backup that includes its own keys, and a single-command
-  removal that leaves the host as it was.
-- **6.4. The cost of adopting a new artifact.** Asking an operator to add a file
-  to their repository is a permanent tax, and it must buy something unobtainable
-  elsewhere. Three constraints, and violating any one of them voids the
-  argument: the system must work without the file; the repository must still run
-  under the plain upstream tool with the file present; and every field must be
-  derivable or omittable. The measure is that the artifact pays for itself in
-  the first week, not the first quarter.
-- **6.5. How the stack scores against its own criteria.** Including the places
-  it currently fails — Othela is a service someone has to run, with no HA
-  story today. A paper that only reports where its own thesis succeeds is
-  worth less than one that marks the boundary.
+### 6.1. The control plane regress
+It is an undeniable reality that every control plane needs another control plane to manage it, creating an endless loop of deferred responsibility. This is the core reason why most modern infrastructure tools tend to evade or refuse to fully address problems at the very bottom of the stack. This concept builds upon the analysis of [the day-2 problem](/ecosystem/the-day-2-problem/).
+
+### 6.2. Quorum as a disqualifier
+Enforcing strong consistency typically requires establishing a quorum. However, quorum implies that a system has a fixed failure threshold; once that threshold is crossed, the entire system halts. While this is the correct operational mechanism for tools like Consul and Vault, this precise characteristic disqualifies them from being the foundational layer beneath all other systems, as they inadvertently become a critical bottleneck.
+
+### 6.3. The eligibility criteria for foundational components
+To become a true foundational component, a tool must make trade-offs and sacrifice certain complex features to guarantee the highest level of availability. The eligibility criteria dictate exactly what the system must discard and which core characteristics it may retain to preserve minimalism and durability. The operational floor established in §5 supplies several of these directly: local diagnosis without the control plane, a single-command backup that includes its own keys, and a single-command removal that leaves the host exactly as it was.
+
+### 6.4. The cost of adopting a new artifact
+Asking an operator to add a file to their repository is a permanent tax, and it must buy something unobtainable elsewhere. Three constraints exist, and violating any one of them voids the argument: the system must work without the file; the repository must still run under the plain upstream tool with the file present; and every field must be derivable or omittable. The measure is that the artifact pays for itself in the first week, not the first quarter.
+
+### 6.5. How the stack scores against its own criteria
+Evaluating the Naughtian stack against the very criteria it proposes is a mandatory exercise. This evaluation includes pointing out areas where it currently falls short — such as Othela, which is presently a service requiring operator maintenance without a complete HA (High Availability) story. A scientific paper only holds true value when it dares to clearly demarcate the boundaries and flaws of its own thesis, rather than merely flattering its successes.
 
 ---
 
