@@ -8,7 +8,15 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
-## Documentation
+## Writing guides
+
+1. Don't use sentence structure like "not A, but B". Instead, just tell B as normal.
+
+Ex: "Not a car, but a truck." -> "It is a truck."
+
+2. Don't use "—" character. Use "-" character instead.
+
+## Documentation of Astro
 
 Full documentation: https://docs.astro.build
 
