@@ -5,14 +5,19 @@ sidebar:
   order: 1
 ---
 
-`helvilette.yml` lives inside your Ansible playbook repository and declares
-what should run where. It follows Kubernetes API conventions closely enough
-that the structure should already be familiar.
+`helvilette.yml` declares what should run where. It follows Kubernetes API
+conventions closely enough that the structure should already be familiar.
+
+Othela discovers manifests by cloning the **fleet repository** named by
+`--fleet-repo` and scanning it for directories containing a `helvilette.yml`.
+Each manifest then points at the playbook repository the agent clones, via
+`spec.repo`. The two can be the same repository, and often are for a single
+playbook.
 
 ## Complete example
 
 ```yaml
-apiVersion: helvilette.io/v1alpha1
+apiVersion: helvilette.naughtian.org/v1alpha1
 kind: PlaybookDeployment
 metadata:
   name: "my-company-edge-proxy-fleet"
@@ -39,7 +44,7 @@ spec:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `apiVersion` | string | yes | Must be exactly `helvilette.io/v1alpha1` |
+| `apiVersion` | string | yes | Must be exactly `helvilette.naughtian.org/v1alpha1` |
 | `kind` | string | yes | Must be exactly `PlaybookDeployment` |
 | `metadata` | object | yes | Identifying information — see below |
 | `spec` | object | yes | The declaration itself — see below |
@@ -95,15 +100,43 @@ An empty `nodeSelector` matches **no** node, not every node. Because that reads
 the opposite way round to most people's intuition, it is rejected at load time
 rather than left to surprise you.
 
-:::caution[Overlapping selectors]
-If an agent's labels match more than one `nodeGroup`, only the **first** one is
-dispatched and the rest are discarded without any log line. The winner is the
-first matching group declared in the alphabetically first matching playbook
-directory.
+### Selectors must be distinct
 
-Until this is resolved, write `nodeSelector` rules that are mutually exclusive.
-Tracked as
-[issue #15](https://github.com/AlexanderSlokov/Helvilette/issues/15).
+Two `nodeGroups` carrying an **identical** `nodeSelector` are rejected at load
+time. Both would match the same nodes, only one of them can be dispatched, and
+the other group's `extra_vars` would disappear with no log line to explain it.
+That is a specification error in the manifest, so it is refused rather than
+resolved arbitrarily.
+
+```yaml
+nodeGroups:
+  - name: "standard-proxies"
+    nodeSelector:
+      role: "edge-proxy"
+  - name: "high-performance-proxies"
+    nodeSelector:
+      role: "edge-proxy"   # identical -> manifest rejected
+```
+
+:::caution[The check is exact equality, not overlap]
+Only identical selector maps are caught. Partial overlap is still accepted and
+still resolves first-match-wins:
+
+```yaml
+nodeGroups:
+  - name: "standard-proxies"
+    nodeSelector:
+      role: "edge-proxy"          # matches
+  - name: "hot-proxies"
+    nodeSelector:
+      role: "edge-proxy"
+      tier: "hot"                 # also matches a node with both labels
+```
+
+A node labelled `role=edge-proxy,tier=hot` matches both groups, and only the
+first is dispatched. Full subset-overlap rejection is deferred to `v1beta1`, so
+until then keep overlapping rules mutually exclusive by hand. See
+[ADR-0004](https://github.com/AlexanderSlokov/Helvilette/blob/main/docs/informations/ADRs/ADR-0004.md).
 :::
 
 ## `spec.nodeGroups[].ansible`
@@ -130,7 +163,7 @@ Rejection happens when any of these is true:
 
 | Condition | Message names |
 |---|---|
-| `apiVersion` is not `helvilette.io/v1alpha1` | the value found and the value expected |
+| `apiVersion` is not `helvilette.naughtian.org/v1alpha1` | the value found and the value expected |
 | `kind` is not `PlaybookDeployment` | the value found and the value expected |
 | `metadata.name` is empty | the field and an example value |
 | `spec.repo` is empty | the field and an example Git URL |
@@ -138,6 +171,7 @@ Rejection happens when any of these is true:
 | `spec.nodeGroups` is empty or absent | the field and what a group requires |
 | A group has no `name` | the group's index and an example name |
 | A group has an empty `nodeSelector` | the group's index, its name, and an example label |
+| Two groups share an identical `nodeSelector` | both indices, both names, and the shared selector |
 
 Every message names the offending field, the value found, and the shape
 expected, so a manifest can be corrected without reading the parser.
@@ -188,8 +222,10 @@ including the control plane and agent components.
 ## Related
 
 - [Schema identity](/helvilette/explanation/schema-identity/) — why
-  `helvilette.io/v1alpha1` rather than `apps/v1`, and what the alpha level
-  promises.
+  `helvilette.naughtian.org/v1alpha1` rather than `apps/v1`, and what the alpha
+  level promises.
+- [Othela configuration](/helvilette/reference/othela-configuration/) — the
+  `--fleet-repo` that tells Othela where to find these manifests.
 - [Diagnose a manifest that deploys
   nothing](/helvilette/how-to/diagnose-a-silent-manifest/) — the task-oriented
   companion to the validation table above.

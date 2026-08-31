@@ -1,6 +1,6 @@
 ---
-title: Why the manifest is helvilette.io/v1alpha1
-description: How Kubernetes API group conventions apply to a tool that is not Kubernetes, and why the version says alpha.
+title: Why the manifest is helvilette.naughtian.org/v1alpha1
+description: How Kubernetes API group conventions apply to a tool that is not Kubernetes, why the version says alpha, and why the group moved to a domain the project owns.
 sidebar:
   order: 5
 ---
@@ -8,7 +8,7 @@ sidebar:
 `helvilette.yml` opens with two lines that look like boilerplate:
 
 ```yaml
-apiVersion: helvilette.io/v1alpha1
+apiVersion: helvilette.naughtian.org/v1alpha1
 kind: PlaybookDeployment
 ```
 
@@ -57,11 +57,39 @@ It does not. Every k3s-owned kind sits under a domain Rancher owns:
 Six projects, one rule, no exceptions: your kinds go under your domain.
 Helvilette follows it.
 
-There is a caveat worth stating plainly. The convention asks for a domain the
-project actually controls. The practical risk of getting that wrong is close to
-zero here, because Helvilette manifests are never submitted to a Kubernetes API
-server and therefore cannot collide with a real CustomResourceDefinition. The
-group functions as a namespace label, not a registered API surface.
+### The rule includes the word "owns"
+
+Helvilette got this half right the first time and had to correct it.
+
+The original group was `helvilette.io`, which looks correct: it is a DNS
+subdomain, it is not an occupied Kubernetes group, and it names the project.
+It was also a domain nobody here had registered. Reading the convention as "use
+a DNS-shaped string" instead of "use a domain you own" leaves the group
+squatting on a name someone else can buy.
+
+The group is now `helvilette.naughtian.org`, a subdomain of the domain the
+project actually owns. That matches what every project in the table above does:
+Rancher owns `cattle.io`, Argo owns `argoproj.io`, and their groups sit
+underneath.
+
+The practical risk of the old name was low, because Helvilette manifests are
+never submitted to a Kubernetes API server and therefore cannot collide with a
+real CustomResourceDefinition. The group functions as a namespace label rather
+than a registered API surface. Low risk is a reason to fix something cheaply
+while the project is still alpha, which is what happened.
+
+:::caution[Action required]
+Every `helvilette.yml` must now read
+`apiVersion: helvilette.naughtian.org/v1alpha1`. A manifest still carrying
+`helvilette.io/v1alpha1` is rejected at load time, with a message naming both
+the value found and the value expected.
+
+Annotation prefixes moved with the group:
+`helvilette.io/last-applied` becomes
+`helvilette.naughtian.org/last-applied`, and the same for `rollback-to` and
+`drift-check-interval`. Those annotations are designed rather than implemented
+today, so this affects planning documents rather than running manifests.
+:::
 
 ## The version is a promise, not a counter
 
@@ -132,12 +160,18 @@ nothing.
 ## What it cost
 
 Every existing manifest had to be updated. The project was pre-release, so the
-bill was three files, and the breaking change was spent once on the group,
-version and kind together rather than three times.
+bill was three files, and the group, version and kind moved together in one
+breaking change rather than three.
 
-The failure mode for anyone who misses the update is a rejection message naming
-both the value found and the value expected — which is the cheapest possible
-way to discover a schema change.
+It was then spent a second time on the domain correction, which is the honest
+cost of having read the convention too loosely the first time. Both moves
+landed while the project is alpha and the manifest count is small, which is
+exactly when a schema identity is cheap to change and exactly why `v1alpha1` is
+the right level to be at.
+
+The failure mode for anyone who misses either update is a rejection message
+naming both the value found and the value expected — which is the cheapest
+possible way to discover a schema change.
 
 ## Related
 
