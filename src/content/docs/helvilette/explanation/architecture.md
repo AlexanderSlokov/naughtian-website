@@ -38,6 +38,19 @@ Its job is narrow: accept declarations, match agent labels against
 `nodeSelector` rules, and hand back job specifications containing a Git repo
 reference and any `extra_vars`.
 
+Declarations reach it through Git and only through Git. Othela clones the
+repository named by `--fleet-repo`, re-pulls it on a timer, and scans the clone
+for `helvilette.yml` manifests. There is no local manifest directory and no API
+for pushing a declaration in, so the state of the fleet is whatever the fleet
+repository says it is, and changing it means a commit. See [Othela
+configuration](/helvilette/reference/othela-configuration/).
+
+Note the two repositories this implies. The fleet repository holds manifests
+and is read by Othela. The playbook repository named in each manifest's
+`spec.repo` is read by the agent. Othela never fetches a playbook, and never
+sends playbook content to an agent: the job carries a repository URL, a
+revision and a path, and the agent does its own cloning.
+
 Critically, **Othela never initiates a connection to an agent.** It has no
 credentials for the nodes it manages and no route to reach them. Every
 connection is outbound from the agent.
