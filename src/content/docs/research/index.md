@@ -57,6 +57,14 @@ Currently a section skeleton rather than a paper. It is published early because
 the argument benefits from being visible while it is still arguable.
 :::
 
+### [Project Kalena](/research/kalena/) - *proposal*
+
+Upcoming project proposal and architectural foundation for Project Kalena. Currently being drafted.
+
+:::note[Proposal in progress]
+This proposal is actively being drafted. The document will expand as design decisions and benchmarks are established.
+:::
+
 ## Method
 
 ### [Whitepaper template](/research/whitepaper-template/)
