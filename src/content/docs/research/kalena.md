@@ -110,7 +110,7 @@ To preserve Operator Experience (OpX), Kalena minimizes manifest authoring overh
 
 ## 3. Ecosystem Fit: Symbiosis with Kuberina
 
-### The Solid Rock and Liquid Flow Paradigm
+### 3.1. The Solid Rock and Liquid Flow Paradigm
 
 In Naughtian mythology, Kalena and Kuberina are companions. Architecturally, they form a two-level dual-temporal scheduling system:
 
@@ -122,6 +122,19 @@ This hybrid model delivers three architectural properties:
 1. **Zero-Latency Baseline:** Production workloads have their placement (`nodeName`) statically decided by Kuberina in the blueprint YAML, reducing production scheduling overhead to 0ms at runtime.
 2. **Focused Runtime Scheduling:** Kalena expends scheduling cycles exclusively on packing opportunistic jobs into unharvested headroom.
 3. **Closed-Loop Feedback:** Kalena records empirical consumption profiles over time and exports this telemetry back to Kuberina. Future planning cycles use empirical distributions to tighten bin-packing margins.
+
+### 3.2. Architectural Feasibility: Decoupling Production Placement from Slack Harvesting
+
+The primary reason centralized systems like Google Borg or generic container schedulers encounter immense complexity when attempting online overcommitment is the conflation of two conflicting responsibilities:
+1. Solving the NP-hard, multi-constraint placement problem (affinity, anti-affinity, gang scheduling, and topology spread) for mission-critical production workloads within milliseconds.
+2. Estimating dynamic resource slack and co-scheduling opportunistic batch workloads in real time.
+
+Kuberina isolates and resolves the first problem entirely in an offline phase. Because Kuberina spends the necessary computational time upfront to generate an optimal, immutable blueprint, production workloads arrive at the cluster with their node assignments pre-determined.
+
+This architectural division fundamentally shifts Kalena's operating requirements:
+* **Localized, Univariate Problem Space:** Kalena evaluates residual slack node-by-node. It matches lightweight opportunistic tasks to local idle capacity without having to re-solve cluster-wide affinity graphs.
+* **Trivial Preemption Decisions:** When a production workload surges, Kalena executes a binary intervention: instantaneously throttle or evict the local batch task. The system avoids complex cluster-wide re-balancing.
+* **Realistic Engineering Scope:** Decoupling the production placement problem allows Kalena to function as a compact, maintainable plugin. The implementation avoids the pitfalls of an overwhelming monolithic scheduler.
 
 ---
 

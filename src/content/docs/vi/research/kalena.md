@@ -117,13 +117,26 @@ Trong truyền thuyết của hệ sinh thái Naughtian, Kalena và Kuberina g�
 * **Kuberina (Pha ngoại tuyến - Offline Pre-planning):** Đóng vai kiến trúc sư cảng biển, tính toán cách xếp các container hàng nặng (tác vụ sản xuất) vào toạ độ cố định trên thân tàu, thoả mãn mọi ràng buộc cứng trước khi tàu ra khơi.
 * **Kalena (Pha trực tuyến - Online Dynamic Tuning):** Đóng vai thuỷ thủ đoàn trên hải trình, nhét các kiện hàng nhỏ nhẹ (tác vụ thu hoạch/lô) vào kẽ hở giữa các container lớn, sẵn sàng vứt bỏ kiện hàng nhẹ khi gặp bão tố nhằm bảo vệ an toàn cho tàu.
 
-### Hình thái lập lịch Tĩnh - Động lưỡng pha (Solid Rock & Liquid Flow)
+### 3.1. Hình thái lập lịch Tĩnh - Động lưỡng pha (Solid Rock & Liquid Flow)
 
 Sự kết hợp giữa Kuberina và Kalena tạo nên một hình thái lập lịch độc đáo:
 
 1. **Triệt tiêu chi phí lập lịch ở tải chính (Zero-Latency Baseline):** Tác vụ sản xuất được Kuberina gán cứng toạ độ (`nodeName`) từ blueprint YAML, giúp thời gian lập lịch runtime của tác vụ chính bằng 0ms.
 2. **Tập trung tài nguyên scheduler cho phần dư:** Kalena chỉ dành chu kỳ tính toán để điều phối các tác vụ lô vào phần headroom nhàn rỗi.
 3. **Vòng lặp tự thích nghi khép kín (Closed-Loop Feedback):** Kalena thu thập hồ sơ tiêu thụ thực tế theo thời gian và gửi ngược về cho Kuberina. Ở chu kỳ deploy kế tiếp, Kuberina dùng dữ liệu phân phối thực tế này để giải bài toán bin-packing chuẩn xác hơn.
+
+### 3.2. Tính khả thi kiến trúc: Tách rời bài toán xếp chỗ sản xuất và thu hoạch tài nguyên
+
+Nguyên nhân khiến các bộ lập lịch tập trung như Google Borg hoặc Kubernetes vanilla gặp khó khăn lớn khi triển khai overcommit trực tuyến là việc phải gánh vác đồng thời hai trách nhiệm đối nghịch:
+1. Giải bài toán tổ hợp NP-hard (affinity, anti-affinity, gang scheduling, phân bổ topology) cho các tác vụ sản xuất quan trọng với độ trễ tính bằng mili-giây.
+2. Ước lượng dung lượng dôi dư và điều phối các tác vụ lô chạy xen kẽ theo thời gian thực.
+
+Kuberina giải quyết dứt điểm bài toán thứ nhất ở pha ngoại tuyến. Nhờ Kuberina dành thời gian tính toán kỹ lưỡng để tạo ra blueprint bất biến tối ưu, các tác vụ sản xuất đã có sẵn toạ độ nút cố định trước khi khởi chạy.
+
+Sự phân tách này thay đổi hoàn toàn phạm vi kỹ thuật của Kalena:
+* **Không gian bài toán đơn biến cục bộ:** Kalena xem xét dung lượng dôi dư trên từng nút độc lập. Hệ thống ghép các tác vụ lô nhẹ vào khoảng trống cục bộ mà không phải giải lại đồ thị ràng buộc phức tạp trên toàn cụm.
+* **Quyết định can thiệp tức thời:** Khi tác vụ sản xuất tăng đột biến tải, Kalena đưa ra phản xạ nhị phân đơn giản: bóp băng thông CPU hoặc trục xuất tác vụ lô tại chỗ. Hệ thống hoàn toàn tránh được việc tái cân bằng phức tạp trên quy mô cụm.
+* **Hiện thực hoá năng lực triển khai:** Nhờ Kuberina gánh vác toàn bộ phần xếp chỗ sản xuất, Kalena giữ được kích thước gọn nhẹ, độ tin cậy cao và hoàn toàn khả thi cho một đội ngũ kỹ sư tinh gọn phát triển.
 
 ---
 
