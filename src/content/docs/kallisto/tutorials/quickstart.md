@@ -1,89 +1,158 @@
 ---
-title: Run Kallisto with Docker
-description: Get a Kallisto server answering KV-v2 requests, then point a workload at it.
+title: Run the demo
+description: Start MinIO, seal a file into it, and watch Kallisto serve and refresh Vault KV-v2 reads.
 sidebar:
   order: 1
 ---
 
-By the end of this tutorial you will have a Kallisto server running in Docker
-with persistent storage, and you will understand how a workload is pointed at
-it.
+By the end of this tutorial you will have the real deployment shape running on
+your machine: an S3 bucket (MinIO), a sealed secrets file uploaded into it, and
+Kallisto polling that bucket and answering Vault KV-v2 reads on
+`127.0.0.1:8200`. You will read a secret, watch a write get refused, and push a
+new version without restarting anything.
 
-:::danger[Prototype software]
-Kallisto has no authentication on the data port, no TLS, and no encryption
-barrier yet. Run this on a local machine or an isolated network. Do not put it
-anywhere that matters.
+:::caution[Demo credentials only]
+The demo's seal key is thirty-two zero bytes and the MinIO credentials are
+placeholders. They are committed on purpose. Never reuse them.
 :::
 
 ## Before you start
 
-You need **Docker**. Nothing else — this path does not require a Rust
-toolchain.
+You need:
 
-## Step 1: Start the server
+- **Linux.** Every demo service uses `network_mode: host`. Kallisto only binds
+  loopback, and a container's own loopback is unreachable from the host, so the
+  demo shares the host's network instead. Docker Desktop on macOS and Windows
+  does not provide host networking the same way.
+- **Docker** with the Compose v2 plugin.
+- **Git**, to fetch the demo files.
+- `curl`, and `python3` to pretty-print JSON.
 
-```bash
-docker run -d \
-  --name kallisto \
-  -p 8200:8200 \
-  -p 8202:8202 \
-  -v my-kallisto-data:/kallisto/data \
-  ghcr.io/alexanderslokov/kallisto:latest
-```
+No Rust toolchain is needed. The images are pulled from GHCR.
 
-Two ports are exposed:
-
-- **8200** — the data port, the same port Vault uses by default. This is what
-  workloads talk to.
-- **8202** — the secondary port.
-
-The volume mount matters. Without `-v`, everything you store vanishes when the
-container is removed.
-
-## Step 2: Confirm it is running
+## Step 1: Get the demo files
 
 ```bash
-docker ps --filter name=kallisto
-docker logs kallisto
+git clone https://github.com/AlexanderSlokov/Naughtian-Kallisto.git
+cd Naughtian-Kallisto/demo
 ```
 
-## Step 3: Point a workload at it
+The directory holds a Compose file, a Kallisto configuration, a plaintext
+secrets file (`plain.demo.json`) and a one-shot init script.
 
-This is the step that makes Kallisto worth using, and it is deliberately
-trivial. Anything already speaking to Vault via `VAULT_ADDR` needs one line
-changed:
+## Step 2: Start it
 
-```diff
-- VAULT_ADDR=https://vault.internal:8200
-+ VAULT_ADDR=https://localhost:8200
+```bash
+docker compose -f docker-compose.demo.yml --env-file .env.demo up
 ```
 
-Because Kallisto implements the Vault KV-v2 API, your existing client code,
-SDKs and tooling keep working unchanged.
+Three things happen in order:
 
-The point of the change: reads that previously crossed the network to a central
-Vault now terminate on the local node. That is what makes per-request secret
-fetching affordable, instead of fetching once at boot and holding plaintext in
-an environment variable for the lifetime of the process.
+1. **MinIO** starts on `127.0.0.1:9000`, with its console on `:9001`.
+2. **kallisto-init** runs once. It creates the `kallisto-demo` bucket, seals
+   `plain.demo.json` into `demo.kal` with `kallisto-ctl`, and uploads it.
+3. **kallisto** starts, polls the bucket every 5 seconds, and serves on
+   `127.0.0.1:8200`.
 
-## Step 4: Understand what you have — and have not — got
+Give it about 20 seconds.
 
-What is working underneath: the KV-v2 read/write path, a cuckoo cache, and
-CLOCK eviction.
+## Step 3: Check that it is serving
 
-What is not there yet: authentication on the data port, TLS, the encryption
-barrier, and the controlplane. There is currently nothing stopping anything
-that can reach port 8200 from reading every secret it serves.
+In a second terminal:
 
-This is why the isolation warning at the top of this page is not boilerplate.
+```bash
+curl -s http://127.0.0.1:8200/v1/sys/health | python3 -m json.tool
+```
+
+Look for three fields:
+
+- `"sealed": false` means a file has loaded. Before the first file loads,
+  Kallisto reports itself sealed and every read answers 503.
+- `"kallisto_file_version": 1` is the content version inside the sealed file.
+- `"kallisto_authorization": "none"` means the file carries no token table, so
+  every read is permitted. That is the single-app sidecar shape, and the demo
+  uses it on purpose.
+
+## Step 4: Read and list
+
+```bash
+# Read one secret
+curl -s http://127.0.0.1:8200/v1/secret/data/app/database | python3 -m json.tool
+
+# List everything under app/
+curl -s 'http://127.0.0.1:8200/v1/secret/metadata/app/?list=true' | python3 -m json.tool
+```
+
+The listing needs `?list=true`, the way Vault spells a LIST over GET.
+`curl -X LIST` works too. A plain GET on `metadata/app/` asks for that path's
+metadata and answers 404.
+
+If you have the `vault` CLI installed, it works unchanged:
+
+```bash
+VAULT_ADDR=http://127.0.0.1:8200 vault kv get secret/app/database
+```
+
+## Step 5: Try to write
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X PUT \
+  http://127.0.0.1:8200/v1/secret/data/app/database
+```
+
+It prints `403`. Kallisto has no write path. A resolver that cannot write is a
+resolver whose stolen credentials are worth nothing, so the door exists and is
+shut.
+
+## Step 6: Push a new version
+
+Open `plain.demo.json`. Change a password, and **raise `"version"` from `1` to
+`2`**. Then re-run the init container to re-seal and re-upload:
+
+```bash
+docker compose -f docker-compose.demo.yml --env-file .env.demo run --rm kallisto-init
+```
+
+Within 5 seconds the health check shows `"kallisto_file_version": 2` and the
+read in step 4 returns the new value. Nothing restarted.
+
+Raising the version is required. Content versions are monotonic and never
+reused, so a file offering a version Kallisto already holds is treated as the
+same file and never opened. Edit a value without bumping the version and you
+will see no change, which is the correct behaviour. A file with a *lower*
+version is refused as a rollback.
+
+## Step 7: Look inside the bucket
+
+Open the MinIO console at `http://localhost:9001` and log in with
+`demo-access-key` / `demo-secret-key`. The `kallisto-demo` bucket holds
+`demo.kal`. Download it and you get AES-256-GCM ciphertext. The plaintext it
+came from is the `plain.demo.json` beside you.
+
+## Tear down
+
+```bash
+docker compose -f docker-compose.demo.yml --env-file .env.demo down -v
+```
+
+`-v` removes the MinIO data and Kallisto's encrypted fallback copy. Use it in
+particular after changing `KALLISTO_SEAL_KEY`: the old fallback copy was sealed
+under the old key, and on the next start Kallisto refuses it with
+`sealed file failed authentication`, then loads from the bucket. The message is
+alarming and harmless.
+
+## What you have seen
+
+- An operator seals a file offline and puts it in a bucket.
+- Each machine's resolver polls, authenticates and serves it on loopback.
+- Writes are refused, and new content arrives by re-sealing with a higher
+  version.
 
 ## Where to go next
 
-- [Build from source](/kallisto/how-to/build-from-source/) — if you want to
-  develop against it.
-- [Run the benchmarks](/kallisto/how-to/run-benchmarks/) — validate the
-  performance claims yourself.
-- [Project status](/kallisto/reference/status/) — the full picture of what is
-  and is not implemented.
-- [Architecture](/kallisto/explanation/architecture/) — dataplane, controlplane,
-  and why it caches rather than stores.
+- [Seal and publish a secrets file](/kallisto/how-to/seal-and-publish-a-file/)
+  with a real key.
+- [Run Kallisto as a sidecar](/kallisto/how-to/run-as-a-sidecar/) next to your
+  own application.
+- [Architecture](/kallisto/explanation/architecture/) for what happens inside
+  the process.

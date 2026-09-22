@@ -129,17 +129,24 @@ Kubernetes cannot perform on itself.
 The same reasoning produces Kallisto's real purpose, which is easy to
 under-sell as a performance feature.
 
-A node-local secret cache means the **request path survives Vault being
+A local read-only resolver means the **request path survives Vault being
 unavailable**. The unseal window after a restart, the leader election after a
-Raft failover, the careful step-down during an upgrade — each of those is a
-period where everything depending on Vault is stalled. With reads terminating
-on the local node, that window stops being an outage.
+Raft failover, the careful step-down during an upgrade: each of those is a
+period where everything depending on Vault is stalled. Kallisto serves from a
+sealed file it already holds, so that window stops being an outage.
 
-That is not caching for throughput. It is **decoupling availability**: taking a
-hard dependency on a quorum-bound system and turning it into a soft one.
+Kallisto takes nothing from Vault at runtime. An operator exports the
+operational secrets, seals them offline and puts the file in a bucket. Each
+machine polls the file and keeps its last good copy encrypted on local disk, so
+even the bucket going down leaves reads answering. Nothing in that chain
+votes.
 
-The throughput benefit is real too — no stampede against the root of trust when
-five hundred pods start at once — but it is the smaller half of the argument.
+This is **decoupling availability**: a hard runtime dependency on a
+quorum-bound system becomes a periodic, offline export.
+
+The throughput benefit is real too, since reads that never leave the machine
+cannot stampede anything when five hundred pods start at once. It is the
+smaller half of the argument.
 
 See [Kallisto's use cases](/kallisto/explanation/use-cases/).
 
@@ -164,8 +171,8 @@ high-availability story today, and if it is down long enough your fleet stops
 converging even though it keeps working.
 
 **Nothing here is production-ready.** Helvilette and Kuberina are alpha.
-Kallisto is a prototype with no authentication on its data port, no TLS and no
-encryption barrier. Read [the roadmap](/ecosystem/roadmap/) before you believe
+Kallisto is a prototype with no network authentication, which is why it
+listens on loopback only, and no audit log. Read [the roadmap](/ecosystem/roadmap/) before you believe
 any of this in practice.
 
 **The comparison is not apples to apples.** Vault has years of scrutiny,

@@ -1,116 +1,116 @@
 ---
 title: Use cases
-description: The three problems Kallisto is built to solve, and when it is the wrong tool.
+description: The problems Kallisto 2.0.0 solves, which secrets belong in it, and when it is the wrong tool.
 sidebar:
-  order: 2
+  order: 3
 ---
 
-The project states three purposes; they are set out below as four, because the
-first one bundles two arguments of very different weight. Each is a shape of
-the same
-underlying idea: secrets should be available where they are needed, at the
-moment they are needed, without a network round trip to the root of trust.
+Kallisto holds **operational secrets**: values your services need often and
+fast, whose leak is contained by revoking them. The secrets whose leak would
+start a compliance incident or cause irreversible damage stay in Vault or
+OpenBao.
 
-## 1. Surviving an unavailable root of trust
+## The decision rule
 
-The case that justifies the component, and the one most easily mistaken for a
-performance feature.
+> If this secret leaks and I revoke it within five minutes, is the damage
+> contained and recoverable?
 
-A quorum-bound secret store has scheduled and unscheduled windows where it
-serves nothing:
+**Yes:** a good fit for Kallisto. **No:** keep it in Vault or OpenBao, with
+full audit trails, compliance policy and HSM integration.
 
-- **After every restart, Vault is sealed** until someone or something unseals
-  it. Shamir shares mean waking up humans; auto-unseal means a dependency on a
-  KMS that may be in the region that is down.
-- **Raft failover** means a leader election, during which writes stop and reads
-  may too.
-- **An upgrade** means a deliberate, careful step-down across the cluster.
+## What it solves
 
-A failed secret read is rarely graceful. A slow database query degrades a
-response; a process that cannot fetch its credentials does not start at all. So
-those windows do not degrade your system — they stop it.
+### Reads that must survive an unreachable upstream
 
-With a node-local dataplane answering reads, the window stops being an outage.
-This is **decoupling availability**: converting a hard dependency on a
-consensus-bound system into a soft one.
+A central secret store has windows where it serves nothing. Vault is sealed
+after every restart, a Raft failover means a leader election, and an upgrade
+means a careful step-down. A failed secret read rarely degrades gracefully: a
+process that cannot fetch its credentials usually does not start at all.
 
-That is the real pitch, and it is the same argument the whole ecosystem rests
-on — see [the day-2 problem](/ecosystem/the-day-2-problem/).
+With Kallisto, a request depends on a process on the same machine and a file it
+already holds. The secret store that produced the file can be down. The bucket
+can be down too: each resolver keeps serving the last authenticated file, and
+restarts from its encrypted local copy. A hard runtime dependency on a
+quorum-bound system becomes a periodic, offline export.
 
-## 2. A cache layer that stops the stampede
+### Per-request secret access
 
-The throughput half. Serve secrets from an upstream system in a fast, scalable
-way at the node level — **without self-DDoS-ing your own infrastructure**.
+Reading a secret right before use and discarding it right after keeps
+plaintext out of application memory for as long as possible, and makes a
+rotation take effect without a restart. Against a central Vault that costs a
+network round trip per use. Against Kallisto it is a loopback call answered
+from RAM, at latencies around a millisecond. See [performance and
+footprint](/kallisto/reference/performance/).
 
-That names a real failure mode. Central Vault deployments fall over during
-rollouts, when hundreds of pods start simultaneously and each fetches its
-secrets at once. The load is bursty, correlated, and arrives precisely when the
-system is least able to absorb it, because a deploy is already in progress.
+### Edge and unreliable links
 
-A node-local cache flattens the burst. The first read on a node reaches
-upstream; the rest are answered locally.
+Gateways and edge nodes need current certificates and keys but often sit on
+links to the core that drop. A resolver per node keeps serving what it has
+while the link is down, and picks up the next version when it returns. This
+composes with [Helvilette](/helvilette/), which targets the same fleets for the
+same reason.
 
-The second-order effect matters more. When reads are cheap, workloads can fetch
-per request rather than at boot, which means a rotated secret takes effect
-without a restart — and plaintext stops living in long-lived process memory for
-weeks at a time.
+### Removing `.env` files
 
-## 3. Secure secret storage in standalone mode
+A sealed file on a bucket, plus a key in the orchestrator's secret store,
+replaces plaintext `.env` files on disk, in backups and on laptops. The
+application reads through the Vault API it may already speak.
 
-Kallisto can run standalone, storing key/value pairs and encrypting data before
-writing it to persistent storage.
+## Good fits
 
-The problem this addresses is `.env` files. They sit unencrypted on disk, get
-copied to laptops, land in backups, and occasionally reach a Git repository.
-Standalone Kallisto lets a system use secrets without files lying around.
+| Secret | Why it fits |
+|---|---|
+| Internal service-to-service tokens | High read rate, easily revoked |
+| Database passwords for non-production | Rotated often, limited scope |
+| Session and JWT signing keys for internal apps | Read-heavy, rotatable |
+| Cache authentication (Redis `AUTH`) | Sub-millisecond reads wanted, revocable |
+| Internal API keys | High throughput, easily regenerated |
+| TLS certificates and keys for internal mTLS | Read at connection setup, rotated by automation |
+| Configuration encryption keys | Read-dominant, app-scoped |
 
-:::caution[Weigh this one carefully]
-Standalone mode is the case where the [missing security
-features](/kallisto/reference/status/) hurt most, because there is no upstream
-system to fall back on. With no authentication on the data port, no TLS and no
-encryption barrier, standalone mode today offers less protection than the
-`.env` file it replaces.
+## Keep these out
 
-Of the four, this is the one to defer until the security work lands.
-:::
+| Secret | Why | Where it belongs |
+|---|---|---|
+| Root CA private keys | Catastrophic if leaked | HSM, or Vault with an HSM backend |
+| Live payment keys (`sk_live_...`) | Direct financial loss, PCI-DSS scope | Vault with audit and compliance policy |
+| Cloud root credentials | Full account takeover | Vault with MFA and break-glass procedure |
+| PII encryption master keys | Regulatory liability | Vault with a FIPS-validated backend |
+| SSH keys to production bastions | Direct infrastructure access | Vault SSH engine or signed certificates |
+| Release signing keys | Supply-chain attack vector | Air-gapped HSM |
 
-## 4. A secure edge config server
+The common reason is the audit log Kallisto does not have. Its access log drops
+lines under load, so it cannot prove who read a secret.
 
-Provide shared TLS certificates, API keys and similar material to an API
-gateway or load balancer fleet at the edge.
+## How it fits next to Vault
 
-Edge fleets have an awkward property: they need current certificates but are
-often on unreliable links to the core network. A local cache means a node can
-keep serving with what it has when the link is down, rather than failing
-because it cannot reach a central store.
+```
+┌──────────────────┐                        ┌───────────────────┐
+│  Vault / OpenBao │   operator exports,    │     Kallisto      │
+│  root of trust   │   seals with           │  one per machine  │
+│                  │   kallisto-ctl, and    │                   │
+│  root CAs        │   uploads  ─────────►  │  service tokens   │
+│  master keys     │   (bucket)             │  DB passwords     │
+│  payment keys    │                        │  API keys, certs  │
+│  rare reads      │                        │  every request    │
+│  full audit      │                        │  no audit log     │
+└──────────────────┘                        └───────────────────┘
+          ▲  admin, rotation                          ▲  loopback reads
+          └──────────────── your services ────────────┘
+```
 
-This composes with the rest of the ecosystem — [Helvilette](/helvilette/)
-targets the same edge fleets, for the same reason.
+Nothing syncs the two automatically. An operator or a CI job exports the
+operational secrets, seals them into a file with `kallisto-ctl`, and uploads it.
+Each machine's Kallisto polls that file.
 
 ## When Kallisto is the wrong tool
 
-Stated plainly, because a use-case page written by the project is not a neutral
-document.
-
-**You do not already have a root of trust.** Kallisto is explicitly designed to
-sit in front of Vault, OpenBao, Infisical or Conjur. Without one, you are
-relying on a prototype for properties it does not claim to provide. Get the
-upstream system first.
-
-**You need production-grade security today.** No authentication on the data
-port, no TLS, no encryption barrier. Network isolation is currently the only
-control.
-
-**Your read volume is low.** If your workloads fetch a handful of secrets at
-boot and Vault is comfortable, a cache adds a component without solving a
-problem you have.
-
-**You need the controlplane features.** Fleet-wide invalidation, cache warming
-and plaintext residency reporting are all design intent, not shipped code.
-
-## Further reading
-
-- [Architecture](/kallisto/explanation/architecture/) — the dataplane and
-  controlplane split.
-- [Project status](/kallisto/reference/status/) — the full implementation
-  picture.
+- **You need dynamic secrets, leases, PKI or transit.** Kallisto serves static
+  values from a file.
+- **You need an audit trail of reads.** The access log is best-effort.
+- **You need something production-grade today.** 2.0.0 is a prototype. See
+  [project status](/kallisto/reference/status/).
+- **Callers are on other machines.** Kallisto serves loopback only and has no
+  network authentication. Run one per machine.
+- **Your reads are rare and Vault is comfortable.** A handful of reads at boot
+  against a healthy Vault gains little from another component.

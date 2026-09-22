@@ -42,10 +42,11 @@ fails.
 		[Overview](/helvilette/) · [Tutorial](/helvilette/tutorials/quickstart/)
 	</Card>
 	<Card title="Kallisto" icon="seti:lock">
-		**Secret delivery for the request path.** A node-local cache in front of
-		your existing Vault or OpenBao, speaking the KV-v2 API. Your request path
-		keeps working while Vault is sealed, failing over, or mid-upgrade.
-		Adopting it is one environment variable. So is removing it.
+		**A read-only secrets resolver on localhost.** It speaks the Vault KV-v2
+		API over one encrypted file on an S3-compatible bucket. Your request path
+		keeps working while Vault is sealed, failing over, or mid-upgrade, and
+		while the bucket is down. Adopting it is one environment variable. So is
+		removing it.
 
 		[Overview](/kallisto/) · [Tutorial](/kallisto/tutorials/quickstart/)
 	</Card>
@@ -72,8 +73,8 @@ losing a vote means the whole thing stops.
 
 Naughtian is deliberately layered. Kuberina decides *where workloads go* before
 anything runs. Helvilette keeps *the machines underneath* converged on their
-desired state. Kallisto serves *the secrets those workloads need* without a
-round trip to the root of trust.
+desired state. Kallisto serves *the secrets those workloads need* from the same machine,
+without a round trip to the root of trust.
 
 <LinkCard
 	title="The stack, layer by layer"

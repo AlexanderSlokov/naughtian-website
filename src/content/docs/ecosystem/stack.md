@@ -21,8 +21,8 @@ Layer 4:  ┌─ Kubernetes ─────────────────�
           │  ← Kuberina plans what goes where,     │
           │    before any of this runs             │
 Layer 3:  ├─ Container runtime (containerd) ───────┤
-          │  ← Kallisto's dataplane answers secret │
-          │    reads locally, per request          │
+          │  ← Kallisto sidecar answers secret     │
+          │    reads on loopback, per request      │
 Layer 2:  ├─ systemd ──────────────────────────────┤
           │  kubelet.service, containerd.service   │
           │  etcd.service, kube-apiserver.service  │
@@ -49,16 +49,17 @@ acts relative to a deployment.
   │                 │      │                 │       │                 │
   │ Solve placement │ ───► │ Serve secrets   │  ◄──► │ Detect drift    │
   │ Emit blueprint  │      │ on every read   │       │ Re-converge     │
-  │ Review it       │      │ Invalidate      │       │ Report state    │
-  │ kubectl apply   │      │ fleet-wide      │       │ Heal Layer 2    │
+  │ Review it       │      │ Poll one sealed │       │ Report state    │
+  │ kubectl apply   │      │ file, read-only │       │ Heal Layer 2    │
   └─────────────────┘      └─────────────────┘       └─────────────────┘
     Runs offline,            Runs on the hot          Runs forever,
-    zero cluster             path, node-local          pull-based, no
+    zero cluster             path, loopback only       pull-based, no
     interference                                       inbound SSH
 ```
 
 Kuberina is a planner: it runs once, produces an artifact, and exits. Kallisto
-is a data plane: it runs on every node and answers requests. Helvilette is a
+is a resolver: it runs beside each application, pulls one sealed file, and
+answers reads. Helvilette is a
 control loop: it never stops.
 
 ## A worked composition
@@ -74,10 +75,10 @@ you do.
    manifests, solves the packing problem offline, and emits
    `blueprint.yaml`. Your team reviews it the way they review code, iterates,
    and applies the version they agreed on.
-3. **Kallisto** runs as a node-local dataplane on those same nodes. The
-   workloads Kuberina placed fetch their secrets from `localhost` per request
-   rather than from a central Vault at boot, so a rollout does not stampede the
-   root of trust.
+3. **Kallisto** runs as a sidecar beside the workloads Kuberina placed. An
+   operator seals their operational secrets into one file on a bucket, and each
+   resolver polls it. The workloads fetch secrets from `127.0.0.1` per request,
+   so neither a rollout nor a sealed Vault reaches the request path.
 
 The seams are deliberately loose. Kuberina emits YAML that any Kubernetes
 accepts. Helvilette runs playbooks that work fine without it. Kallisto speaks
@@ -90,6 +91,6 @@ an API that Vault already speaks.
 | Expensive GPU nodes sitting at 30% utilisation while pods go unschedulable | [Kuberina](/kuberina/) |
 | Config drift across VMs, and SSH keys concentrated on one laptop or CI server | [Helvilette](/helvilette/) |
 | Your services stalling every time Vault is sealed, failing over or upgrading | [Kallisto](/kallisto/) |
-| Vault getting hammered at every rollout, or `.env` files lying around on disk | [Kallisto](/kallisto/) |
+| Services re-reading the same secrets on every request, or `.env` files lying around on disk | [Kallisto](/kallisto/) |
 | Nobody owning the question of who operates Vault and Consul themselves | [The day-2 problem](/ecosystem/the-day-2-problem/) first |
 | Needing to justify a placement decision to someone who will challenge it | [Kuberina](/kuberina/) plus the [paper](/research/kuberina-stowage-scheduling/) |
