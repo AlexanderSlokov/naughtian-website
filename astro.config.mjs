@@ -74,6 +74,7 @@ export default defineConfig({
 				{
 					label: 'The ecosystem',
 					items: [
+						{ label: 'The letter from Naught', link: '/ecosystem/the-letter-from-naught/' },
 						{ label: 'What is Naughtian?', link: '/ecosystem/overview/' },
 						{ label: 'The day-2 problem', link: '/ecosystem/the-day-2-problem/' },
 						{ label: 'The stack', link: '/ecosystem/stack/' },
