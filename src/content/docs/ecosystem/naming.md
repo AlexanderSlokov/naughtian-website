@@ -60,7 +60,7 @@ same reason.
 
 ## Kallisto
 
-[Naughtian Kallisto](/kallisto/) is the secret engine.
+[Naughtian Kallisto](/kallisto/) is the secrets resolver.
 
 :::note[Not yet documented]
 The saga origin of *Kallisto* is not recorded in the project glossary. If it

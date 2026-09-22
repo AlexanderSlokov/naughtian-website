@@ -1,29 +1,30 @@
 ---
 title: Naughtian
-description: An ecosystem of infrastructure tools for the 80% who never got a Kubernetes control plane.
+description: Infrastructure tools for the lone operator. Small enough to audit in a day, with no consensus to babysit, and nothing held hostage when you walk away.
 template: splash
 hero:
-  tagline: Infrastructure tooling for everyone who never got a control plane. Offline scheduling, pull-based delivery, and secrets on the request path.
+  tagline: Your operational pain is real, and a lone operator deserves a real answer. Tools small enough to audit in a day, with no consensus to babysit, that leave your infrastructure intact the day you walk away.
   image:
     file: ../../assets/helvilette.webp
   actions:
+    - text: Read the letter from Naught
+      link: /ecosystem/the-letter-from-naught/
+      icon: right-arrow
     - text: What is Naughtian?
       link: /ecosystem/overview/
-      icon: right-arrow
-    - text: Read the research
-      link: /research/
       icon: open-book
       variant: minimal
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## The stack
+## The tools
 
-Three tools, three layers. Decisions get written down before they are executed
-rather than reconstructed from a dashboard afterwards — and nothing in the
-foundation is allowed to take the rest of the system down with it when it
-fails.
+One operator cannot baby-sit a Vault cluster, guard a fragile `tfstate`, and
+pray each night that Consul avoids a split-brain. Each tool here takes one of
+those burdens and settles it for good. Each does one job, stands on its own,
+and attaches to assets you already own. Compose them the way you chain `grep`
+and `awk`, or use one and ignore the rest.
 
 <CardGrid>
 	<Card title="Kuberina" icon="seti:kubernetes">
@@ -42,10 +43,11 @@ fails.
 		[Overview](/helvilette/) · [Tutorial](/helvilette/tutorials/quickstart/)
 	</Card>
 	<Card title="Kallisto" icon="seti:lock">
-		**Secret delivery for the request path.** A node-local cache in front of
-		your existing Vault or OpenBao, speaking the KV-v2 API. Your request path
-		keeps working while Vault is sealed, failing over, or mid-upgrade.
-		Adopting it is one environment variable. So is removing it.
+		**A read-only secrets resolver on localhost.** It speaks the Vault KV-v2
+		API over one encrypted file on an S3-compatible bucket. Your request path
+		keeps working while Vault is sealed, failing over, or mid-upgrade, and
+		while the bucket is down. Adopting it is one environment variable. So is
+		removing it.
 
 		[Overview](/kallisto/) · [Tutorial](/kallisto/tutorials/quickstart/)
 	</Card>
@@ -53,27 +55,52 @@ fails.
 
 ## Why this exists
 
-The previous generation of infrastructure tooling solved workload management
-and quietly left control-plane management as an exercise for the reader. Vault
-manages your secrets — who manages Vault? Consul discovers your services — who
-keeps its quorum healthy?
+The capabilities that keep infrastructure calm, such as secret rotation,
+reconciliation loops and reviewed placement, usually arrive bundled inside an
+enterprise suite, a paid tier, or a platform team you do not have. Small
+organisations patch around the gap with duct tape that looks fine from outside
+and rots from within, and learn to leave running things untouched.
 
-**Every control plane needs a control plane.** And anything that must have
-quorum is structurally disqualified from being the bottom of the stack, because
-losing a vote means the whole thing stops.
+Naughtian brings those capabilities to a single operator. The approach can be
+blunt and the pace deliberate. The goal is to end the pain permanently, with no
+extra payment asked to make it stop.
+
+<LinkCard
+	title="The letter from Naught"
+	description="The manifesto behind every project here: minimalism over pragmatism, inert software, and zero hostage infrastructure."
+	href="/ecosystem/the-letter-from-naught/"
+/>
+
+## What every tool promises
+
+- **You can read all of it.** The codebase is small enough to audit in a day.
+  An operator needs no certification to run it, and an ordinary AI agent can
+  follow it.
+- **It holds no state worth fearing.** At rest the software is inert, so backup
+  and restore are yours to do at will. It leans on distributed consensus as
+  little as it can, because the most resilient consensus protocol is none.
+- **It hides nothing and decides nothing for you.** Every action is observable,
+  and the final call stays in human hands.
+- **It takes no hostages.** Remove any tool and your playbooks, manifests and
+  Vault-speaking applications keep working. Your assets come back to you.
+
+Vault manages your secrets, and someone still has to manage Vault. Anything
+that needs a quorum to keep running cannot be the bottom of the stack, because
+losing a vote stops everything built on it.
 
 <LinkCard
 	title="The day-2 problem"
-	description="The core argument: who operates the operators, why quorum disqualifies a system from being the foundation, and what Naughtian does and does not solve."
+	description="Who operates the operators, why quorum disqualifies a system from being the foundation, and what Naughtian does and does not solve."
 	href="/ecosystem/the-day-2-problem/"
 />
 
 ## Where each one sits
 
-Naughtian is deliberately layered. Kuberina decides *where workloads go* before
-anything runs. Helvilette keeps *the machines underneath* converged on their
-desired state. Kallisto serves *the secrets those workloads need* without a
-round trip to the root of trust.
+Kuberina decides *where workloads go* before anything runs. Helvilette keeps
+*the machines underneath* converged on their desired state. Kallisto serves
+*the secrets those workloads need* from the same machine, without a round trip
+to the root of trust. When any of them fails, the layers around it keep
+working.
 
 <LinkCard
 	title="The stack, layer by layer"
@@ -83,14 +110,25 @@ round trip to the root of trust.
 
 ## Research
 
-Design decisions here are argued in public before they are implemented. The
-whitepapers carry the mathematics, the benchmarks, and the reasoning.
+Every design is argued in public before it is built, so its reasoning can be
+questioned and broken by anyone. The papers carry the mathematics, the
+benchmarks and the argument, including what has not yet been measured.
 
 <CardGrid>
 	<LinkCard
 		title="Kuberina: Maritime Stowage-Inspired Combinatorial Optimization"
-		description="The full paper — problem formulation, the three-phase FFD/GA/CSP pipeline, and results on a 186-node, 2,714-pod benchmark."
+		description="Problem formulation, the three-phase FFD/GA/CSP pipeline, and results on a 620-node, 2,714-pod benchmark."
 		href="/research/kuberina-stowage-scheduling/"
+	/>
+	<LinkCard
+		title="Operator Experience"
+		description="The cost of diagnosing a system under pressure, treated as a measurable design property."
+		href="/research/operator-experience/"
+	/>
+	<LinkCard
+		title="Kalena (proposal)"
+		description="Online resource reclamation and opportunistic co-scheduling on the slack Kuberina leaves behind."
+		href="/research/kalena/"
 	/>
 	<LinkCard
 		title="Whitepaper template"
@@ -99,8 +137,16 @@ whitepapers carry the mathematics, the benchmarks, and the reasoning.
 	/>
 </CardGrid>
 
-## Also coming
+## Your pain, your answer
 
-**Kalena**, **Kaeliir** and **Ginnungagap** are in the works and will appear
-here as they become real. Names come from the same saga as the rest — see
-[names and mythology](/ecosystem/naming/).
+These tools are one answer to pain that someone faced directly. It may not fit
+yours. The source is open for that reason: bring the operational stories these
+projects cannot yet resolve, fork a repository and reshape it, or build what is
+missing.
+
+> I have recognized my pain. Where is my solution? If nobody built it yet, I
+> will create it myself.
+
+**Kalena**, **Kaeliir** and **Ginnungagap** are the next answers in progress,
+and will appear here as they become real. Their names come from the same saga
+as the rest. See [names and mythology](/ecosystem/naming/).

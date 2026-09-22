@@ -56,7 +56,7 @@ argue with before it takes effect.
 |---|---|---|
 | Pod placement | `kube-scheduler` decides in milliseconds, invisibly | [Kuberina](/kuberina/) computes a blueprint you can review and version |
 | Machine state | Someone SSHes in and runs a playbook | [Helvilette](/helvilette/) agents pull and reconcile continuously |
-| Secret access | Fetched at boot, cached in an env var, hoped for | [Kallisto](/kallisto/) serves them per request from a node-local cache |
+| Secret access | Fetched at boot, cached in an env var, hoped for | [Kallisto](/kallisto/) serves them per request from a sealed file, on loopback |
 
 This is the same shift Git brought to code — reviewable diffs instead of FTP
 uploads — and Terraform brought to infrastructure — `terraform plan` instead of
@@ -74,8 +74,9 @@ Being explicit about non-goals keeps the boundaries honest:
   Kubernetes then executes. It never touches a running cluster.
 - **Not a configuration management system.** Helvilette delivers Ansible; it
   does not replace it. Remove Helvilette and you still have working playbooks.
-- **Not a root of trust.** Kallisto caches secrets in front of Vault, OpenBao
-  or Infisical. It is explicitly not a drop-in replacement for any of them.
+- **Not a root of trust.** Kallisto serves operational secrets that an
+  operator exports and seals. Vault or OpenBao keeps the crown jewels, the audit
+  trail and everything dynamic.
 - **Not a CI/CD platform.** None of these tools want to be GitHub Actions.
 
 Every tool in the ecosystem is designed so that removing it leaves you with

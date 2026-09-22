@@ -1,102 +1,100 @@
 ---
 title: Project status
-description: What is implemented, what is not, and the version and licensing warnings that apply.
+description: What 2.0.0 implements, what it deliberately leaves out, what it does not protect against, and the licence.
 sidebar:
-  order: 1
+  order: 7
 ---
 
-Kallisto is a **prototype**. This page collects every caveat the project states
-about itself, in one place, so you can make an informed decision rather than
-discovering them later.
+Kallisto 2.0.0 is a **prototype under active rework**. The project's own
+advice is not to run it where it matters yet, and it makes no stability
+promise. This page collects the caveats in one place.
 
-## Implementation status
+## What 2.0.0 is
+
+2.0.0 replaced the secrets server of the 1.x line with a local, read-only
+resolver. The design is set out in ADR-0015 and amended by ADR-0016 in the
+Kallisto repository.
+
+## Implemented
 
 | Component | State |
 |---|---|
-| KV-v2 read/write path | Working |
-| Cuckoo cache | Working |
-| CLOCK eviction | Working |
-| Authentication on the data port | **Not built** |
-| TLS | **Not built** |
-| Encryption barrier | **Not built** |
-| Controlplane | **Not built** |
+| Vault KV-v2 read surface (`data`, `metadata`, LIST) | Working, tested with three real SDKs |
+| Write routes | Answer 403 by design |
+| Bucket source (S3-compatible, SigV4, ETag polling) | Working |
+| Disk source | Working |
+| AES-256-GCM sealed file with authenticated header | Working |
+| Anti-rollback on content version, including across restarts | Working |
+| Encrypted local fallback copy | Working |
+| Token table and Vault-syntax policies | Working |
+| Per-secret encryption in RAM between requests | Working |
+| Process hardening (no core dumps, no ptrace attach, key locked in RAM) | Best effort, reported at startup |
+| Loopback-only bind, enforced at startup | Working |
+| Per-worker rate limiting with 429 and `Retry-After` | Working |
+| Prometheus metrics and access log | Working |
+| `kallisto-ctl` offline tool | Working |
 
-The project's own summary is blunt:
+## Removed in 2.0.0
 
-> Do not run this where it matters.
+The following existed in the 1.x secrets server and were deleted, because the
+problem the project solves changed:
 
-Note what the missing rows mean together: anything that can reach the data port
-can read every secret Kallisto serves, over plaintext HTTP, with the values
-unencrypted at the barrier. Network isolation is currently the only control.
+- The KV-v2 write path, version history, CAS, soft delete and destroy.
+- The storage engine: RocksDB, the sharded cuckoo cache, CLOCK eviction.
+- The admin server on port 8202 and the gossip controlplane.
+- The C++ core and its FFI bridge.
 
-## Version warnings
+Plans for `redb`, Raft, leases, proxy mode and multi-node operation are
+superseded along with them.
 
-**Versions 1.0.0 to 2.0.0 are not official production releases.** The project
-explicitly declines accountability for application security, compliance or
-stability if you use these versions in production — directly or indirectly —
-and it causes damage to your business. Use at your own consent.
+## Out of scope by design
 
-**Version 1.0.0 begins the rewrite in Rust.** Breaking changes are expected and
-will affect stability during this period.
+Auth methods, dynamic secrets, leases, token expiry, PKI, transit and any other
+secret engine. Kallisto is a resolver that sits beside a root of trust. For
+those features, run OpenBao or Vault.
 
-**Version 2.0.0, tagged `2.0.0-lts`, is the intended first production-ready
-release.** The project's advice is to wait for it.
+## What it does not protect against
 
-## Not a replacement for your root of trust
+- **Root on the machine, or anyone who can read the process's memory.** The
+  in-RAM barrier makes a core dump or a swap file less rewarding. A live
+  debugger with root still wins. Nothing at this layer can stop that.
+- **A response in flight.** While a secret is written into an HTTP response, it
+  is cleartext in the process. Serving a secret means exactly that.
+- **Anyone holding the seal key.** They can read the file. Keep the key in your
+  orchestrator's secret store.
+- **Network callers, if the port is exposed.** There is no network
+  authentication. Binding beyond loopback with `--i-accept-the-risk` makes
+  Kallisto an unauthenticated secrets endpoint for everyone who can reach it.
+- **Questions an audit log answers.** The access log drops lines under load.
+  It cannot say with certainty who read what.
 
-This deserves its own heading because it is the most likely way to misuse the
-software.
+## Verification
 
-Kallisto should be integrated into an **existing** secret management system —
-Vault, OpenBao, Infisical, Conjur. That is an intentional design decision to
-avoid taking on the security responsibilities and complexity of being a root of
-trust.
-
-Despite offering a similar API interface and contract to Vault and OpenBao,
-Kallisto **cannot and should not** replace them as an upstream secret
-management platform. It is a cache in front of one.
+The Kallisto repository keeps a ledger at
+`docs/references/verification-status.md` that separates what is proven by a
+test, what is only believed, and what was retired with deleted code. Every
+security-invariant test was checked by deliberately breaking the
+implementation and confirming the test failed. `make verify` is the blocking
+gate. Loom, fuzzing and mutation testing run on a schedule.
 
 ## Licensing
 
-Kallisto is licensed under **AGPLv3**. Custom commercial or enterprise licences
-can be discussed with the author.
+Kallisto is **AGPLv3** (`AGPL-3.0-or-later`). A commercial licence can be
+discussed with the author.
 
 For the wider ecosystem picture, see [Kuberina's licensing
-reference](/kuberina/reference/licensing/), which sets out the three-phase
-strategy applied there.
-
-## Planned work
-
-- **Pluggable storage backends.** RocksDB is the reference implementation;
-  SQLite and other key/value systems are planned.
-- **Docker Engine secret storage support**, for storing a Docker PAT safely.
+reference](/kuberina/reference/licensing/).
 
 ## Documentation
 
-Kallisto maintains its own documentation site inside its repository at `docs/`,
-built with Hugo and already organised along Diátaxis lines — `tutorials`,
-`operations`, `references`, `explanation`, `examples`.
+This site holds the operator documentation: tutorials, how-to guides and
+reference. The Kallisto repository's `docs/` directory holds the engineering
+records, as plain markdown read on GitHub:
 
-That corpus is substantially larger than what has been brought into this site.
-It includes:
-
-- **ADRs** — a numbered sequence of architecture decision records
-- **Benchmarks** — archived results across the C++ and Rust implementations,
-  plus a DragonflyDB comparison
-- **Internals** — HA, integrated storage, KEK rotation, limits, replication,
-  telemetry, tokens
-- **Operations** — audit sinks (file, socket, syslog), storage configuration
-  (RocksDB, SQLite, S3), Kubernetes CSI deployment
-- **API reference** — the Vault KV-v2 contract
-
-Until that material is migrated, the repository's `docs/` directory is the
-authoritative source for those topics. Serve it locally with `make docs-serve`.
-
-The section naming maps onto this site as follows:
-
-| Kallisto Hugo docs | This site |
-|---|---|
-| `tutorials/` | Tutorials |
-| `operations/` | How-to guides |
-| `references/` | Reference |
-| `explanation/` | Explanation |
+- **ADRs** under `docs/references/ADRs/`. ADR-0015 and ADR-0016 define the
+  current design. Superseded ADRs say so in their front matter.
+- **Verification status**, described above.
+- **Benchmarks** under `docs/references/benchmarks/`. Most reports predate
+  2.0.0 and measure the deleted write path.
+- **Architecture in depth**, including the two abandoned architectures, under
+  `docs/explanation/how-to-create-naughtian-kallisto/`.

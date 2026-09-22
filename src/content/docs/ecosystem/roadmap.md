@@ -17,7 +17,7 @@ research code until its documentation says otherwise.
 |---|---|---|---|
 | [Kuberina](/kuberina/) | Rust solver, Go frontend planned | Alpha | Rust solver: FFD warm-start, GA optimisation, CSP forward checking. Benchmark and validation pipeline via Make targets. |
 | [Helvilette](/helvilette/) | Go | Alpha | Othela control plane, polling agent, Git clone and `ansible-playbook` execution, structured JSON reporting, E2E suite. |
-| [Kallisto](/kallisto/) | Rust 2024 | Prototype | KV-v2 read/write path, cuckoo cache, CLOCK eviction. |
+| [Kallisto](/kallisto/) | Rust 2024 | Prototype (2.0.0) | Read-only Vault KV-v2 resolver: sealed file from a bucket or disk, anti-rollback, encrypted fallback copy, token policies, metrics, `kallisto-ctl`. |
 
 ## Known gaps
 
@@ -32,9 +32,10 @@ driven through the Makefile. See
 **Helvilette** — the project is pre-release. Contributor guide, mailing lists
 and communication channels are still placeholders in the upstream repository.
 
-**Kallisto** — not built yet: authentication on the data port, TLS, the
-encryption barrier, and the entire controlplane. The dataplane is the only part
-that exists.
+**Kallisto** - there is no network authentication, so port 8200 must stay on
+loopback, and no audit log, since the access log drops lines under load. The
+project calls 2.0.0 a prototype with no stability promise. See [project
+status](/kallisto/reference/status/).
 
 ## Planned work
 
@@ -56,13 +57,11 @@ happens on cheap on-premise hardware.
 
 ### Kallisto
 
-Pluggable storage backends beyond the RocksDB reference implementation —
-SQLite and other key/value systems. Docker Engine secret storage support.
-
-Version numbering carries a warning worth repeating: releases `1.0.0` through
-`2.0.0` are not production releases, and `1.0.0` begins the rewrite into Rust,
-so breaking changes are expected. `2.0.0-lts` is intended to be the first
-production-ready tag.
+2.0.0 replaced the secrets server with a read-only resolver, and the plans
+built on the old design (a `redb` storage backend, Raft, leases, proxy mode,
+multi-node operation and the gossip controlplane) are superseded along with it.
+The source is kept as a port, so a third source beside bucket and disk is the
+extension point the design anticipates.
 
 ## New projects
 
