@@ -37,37 +37,21 @@ titles](#appendix-a--candidate-titles-working-note) at the foot of this page.
 ## Working thesis
 
 Operator Experience (OpX) is the cost, borne by a human, of understanding and
-correcting a system's behaviour under time pressure. It is distinct from
-Developer Experience in both moment and duration. DevEx is bounded: it begins
-when someone sets up a development environment and ends when they have something
-shippable. OpX is measured across the whole remaining lifecycle — from the
-moment an operator installs the system until the day it is decommissioned and
-removed.
+correcting a system's behaviour under time pressure. 
 
-The claim this paper defends is that OpX is not a matter of polish applied
-after the architecture is settled. It is decided *by* the architecture — by
-which artifacts exist, which state is visible, and which failures are
-self-explanatory — and it can therefore be reasoned about as a design
-constraint rather than as a quality of the documentation.
+It is distinct from Developer Experience in both moment and duration. DevEx begins when someone sets up a development environment and ends when they have something shipped. OpX is measured across the whole infrastructure's lifecycle: from the moment an operator installs the system until the day it is decommissioned and removed.
 
-The constraint has a compact statement, which the rest of the paper elaborates:
+The claim this paper defends is that: "OpX is not a polish layer applied after the architecture is settled. It is decided *by* the architecture" -  and therefore can be reasoned about as a design constraint, rather than as a nice-to-have and expensive to buy add-ons.
+
+The constraint has a compact statement:
 
 > **Hide the complexity of setup. Expose consequences fully.**
 
-Installation may be one command. What the system is about to do to the
-operator's machines may not be hidden by one character.
-
 The Naughtian stack applies that constraint in two directions:
 
-- **Reflexive OpX** — each tool is cheap to operate *itself*. It does not
-  answer the day-2 problem by adding another stateful, quorum-bound system that
-  someone must now keep alive.
-- **Assistive OpX** — each tool lowers the operating cost of the incumbent
-  platform it sits alongside. Kubernetes, Ansible and Vault are not replaced;
-  the expensive parts of operating them are made legible.
-
-The second direction is what separates this from a critique. A tool that
-improves only its own OpX has optimised a system nobody was struggling with.
+- **Reflexive OpX**: each tool is cheap to operate *itself*. It does not answer the problem by adding another system that someone must keep alive.
+- **Assistive OpX**: each tool lowers the operating cost of the incumbent
+  platform it sits alongside. 
 
 ---
 
@@ -76,13 +60,7 @@ improves only its own OpX has optimised a system nobody was struggling with.
 *Written last. Context → the gap → the proposal → the evidence → the
 implication, in 150–250 words.*
 
-For the Naughtian stack, we introduce a new design priority: Operator Experience (OpX).
-OpX is the day-0 through day-n experience of an SRE/infra engineer running the tool.
-When a design call is contested, break the tie on operator cost — especially
-the *cost of diagnosing a problem under pressure*, not the cost of the happy path.
-This favours approaches with visible/explicit sources over invisible/ambient ones;
-fail loudly at startup over silently degrading to defaults; and defaults that 
-contain blast radius rather than collide fleet-wide.  
+For the Naughtian stack, we introduce a new design priority: Operator Experience (OpX). OpX is the *day-0 through day-n* experience of an operator running the tool. This favours approaches with visible/explicit sources; fail loudly at startup and defaults that contain blast radius.  
 
 ---
 
@@ -114,9 +92,6 @@ pressure"*
 
 ## 2. Related work and background
 
-*Not a history. An argument that the existing frames are each necessary and
-each insufficient for this question.*
-
 - **Site Reliability Engineering.** Error budgets and toil reduction — the
   closest existing vocabulary; where it stops.
 - **Developer Experience.** Why the day-0/day-n distinction matters and why
@@ -138,10 +113,7 @@ each insufficient for this question.*
 
 ## 3. Why operator experience is under-supplied
 
-This section argues that the scarcity of operator experience is not a failure of
-craft or of care. It is the predictable output of an incentive structure, and it
-is therefore stable: it will not be corrected by exhortation, and it has not been
-corrected by two decades of increasing engineering budgets.
+The scarcity of operator experience is not a failure of craft or of care. It is the predictable output of an incentive structure, and it is therefore stable.
 
 ### 3.1. Developers are buyers; operators are heirs
 
@@ -160,7 +132,7 @@ order-of-magnitude assertion.)*
 
 ### 3.2. The feedback latency decides the budget
 
-Developer experience is felt at minute five. It can be demonstrated, recorded,
+Developer experience can be demonstrated, recorded,
 put on a landing page, and measured through a conversion funnel. Operator
 experience is felt at month eighteen. "In two years this will not ruin your
 Tuesday night" cannot be A/B tested and appears on no growth dashboard. What
@@ -178,26 +150,13 @@ This is the least comfortable claim in the paper and the one that most needs
 stating.
 
 If self-hosting a piece of software is painful, its users buy the vendor's cloud
-edition. The pain is not a defect in the business model; it *is* the sales
-funnel. Almost every open-core vendor has a structural incentive for
-`docker compose up` to work beautifully in the first five minutes and for day
-three hundred to be miserable. No meeting is required to decide this. It is what
-falls out of "fund whatever raises conversion", repeated for three years.
+edition. The pain *is* the sales funnel. Almost every open-core vendor has a structural incentive for `docker compose up` to work beautifully in the first five minutes and for day three hundred to be miserable. It is what falls out of "fund whatever raises conversion", repeated for three years.
 
-The conclusion follows directly, and it is the paper's central diagnostic claim:
-**managed platforms do not win because they are better. They win because the
-alternative is not funded by anyone.**
+The conclusion is: **managed platforms do not win because they are better. They win because the alternative is not funded by anyone.**
 
 ### 3.4. Enterprise tooling optimises for the signing moment
 
-The buyer of an enterprise automation platform is not the person carrying the
-pager at 03:00. It is an executive signing a contract. What wins an enterprise
-procurement is the RBAC matrix, the audit log, the compliance report, the SSO
-integration. Nobody in that room asks whether the error message tells the
-operator what to do next.
-
-These are two different products, and the distance between them does not close
-with more money. It is not a quality gap; it is a specification gap.
+ What wins an enterprise procurement is the RBAC matrix, the audit log, the compliance report, the SSO integration. Nobody in that room asks whether the error message tells the operator what to do next. 
 
 ### 3.5. The segment where the operator is the buyer
 
@@ -214,12 +173,7 @@ as a first-class constraint rather than as a refinement.
 ### 3.6. The incentive moat, and the honest counter-argument
 
 The only party with no incentive to make self-hosting unpleasant is the party
-that does not sell a managed service. This is not a claim to superior skill; it
-is a claim about incentives, and it is the kind of advantage that capital cannot
-buy back.
-
-The counter-argument must be stated, because it is partly correct. Not all of
-this badness is structural self-interest. Infrastructure software genuinely is
+that does not sell a managed service.  Infrastructure software genuinely is
 harder than developer tooling. Developer tools run on a laptop. Infrastructure
 tools run on someone's peculiar long-term-support distribution with mandatory
 access control enforcing, behind a corporate proxy, with broken DNS. The
@@ -485,7 +439,7 @@ from a halt.** A halt that expires after thirty minutes and retries has created
 a slow loop, which is the worst kind, because it gnaws while everyone believes
 things have stopped.
 
-**The boundary of autonomous action is consensus, not data.** The question is not
+**The boundary of autonomous action is consensus.** The question is not
 whether an operation touches business data. It is: *if two nodes both act on
 this, is the consequence unrecoverable?* Promoting a database replica requires
 fencing and an arbiter, and is out of scope for any system without one. Renewing
@@ -647,19 +601,9 @@ observed value; how many hops separate symptom from cause; whether the failure
 names its own source; whether a conflict is resolvable from a single artifact;
 and whether diagnosis remains possible with the control plane down.
 
-### 8.5. Evaluate by how it fails, not by how it runs
+### 8.5. Evaluate by how it fails
 
-The discipline worth borrowing is SQLite's: the overwhelming majority of that
-project's effort goes into proving it does not break rather than into making it
-run, and much of its test suite simulates a hostile environment — exhausted
-memory, full disks, power loss during a write, storage returning garbage. The
-ratio is unreachable for a small project. The habit is not.
-
-Instantiated as an acceptance rubric, this means a system is judged on failing
-runs rather than clean ones: power removed mid-operation; a bad change released
-across part of a fleet; the agent severing its own network path while running;
-and restoration onto a blank machine from a backup. A clean run demonstrates that
-the operator's automation was correct. It demonstrates nothing about the tool.
+The discipline worth borrowing is SQLite's: the overwhelming majority of that project's effort goes into proving it does not break and much of its test suite simulates a hostile environment — exhausted memory, full disks, power loss during a write, storage returning garbage. Instantiated as an acceptance rubric: A clean run demonstrates that The operator's automation was correct. It demonstrates nothing about the tool.
 
 ### 8.6. Bounded-window testing, and when it does not apply
 
