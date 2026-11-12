@@ -83,7 +83,7 @@ Kallisto is **AGPLv3** (`AGPL-3.0-or-later`). A commercial licence can be
 discussed with the author.
 
 For the wider ecosystem picture, see [Kuberina's licensing
-reference](/kuberina/reference/licensing/).
+reference](/kuberina/references/licensing/).
 
 ## Documentation
 

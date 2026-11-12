@@ -55,7 +55,7 @@ host through `ps`.
   policies](/kallisto/how-to/add-tokens-and-policies/).
 
 The full schema is in the [sealed file
-reference](/kallisto/reference/sealed-file/). Keep the plaintext out of git, or
+reference](/kallisto/references/sealed-file/). Keep the plaintext out of git, or
 keep it encrypted there.
 
 ## 3. Seal it

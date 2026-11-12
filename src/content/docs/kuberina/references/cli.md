@@ -98,7 +98,7 @@ paper, preceded by a daemonset pre-deduction pass:
 
 ## See also
 
-- [Make targets](/kuberina/reference/make-targets/) — the wrappers around these
+- [Make targets](/kuberina/references/make-targets/) — the wrappers around these
   invocations.
 - [The paper](/research/kuberina-stowage-scheduling/) — the mathematics behind
   each phase.

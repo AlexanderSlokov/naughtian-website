@@ -110,4 +110,4 @@ Nothing is recorded, and the server says so on stderr at startup.
 `kallisto_access_log_dropped_total` stays at zero.
 
 Every metric and the full line format are in the [metrics and logs
-reference](/kallisto/reference/metrics/).
+reference](/kallisto/references/metrics/).

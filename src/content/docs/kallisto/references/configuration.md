@@ -165,4 +165,4 @@ spec:
 ```
 
 Tokens and policies are absent here on purpose. They live inside the sealed
-file. See [the sealed file](/kallisto/reference/sealed-file/).
+file. See [the sealed file](/kallisto/references/sealed-file/).

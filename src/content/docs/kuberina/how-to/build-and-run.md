@@ -117,13 +117,13 @@ make solver-fmt
 
 :::note[Contributions require a CLA]
 Because of the [planned licence
-transitions](/kuberina/reference/licensing/), pull requests require agreeing to
+transitions](/kuberina/references/licensing/), pull requests require agreeing to
 a Contributor License Agreement. It grants the project the right to re-license
 your contribution under the roadmap.
 :::
 
 ## Related
 
-- [Make target reference](/kuberina/reference/make-targets/) — every target,
+- [Make target reference](/kuberina/references/make-targets/) — every target,
   with what it expands to.
-- [CLI reference](/kuberina/reference/cli/) — the `plan` subcommand in detail.
+- [CLI reference](/kuberina/references/cli/) — the `plan` subcommand in detail.

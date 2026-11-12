@@ -224,7 +224,7 @@ including the control plane and agent components.
 - [Schema identity](/helvilette/explanation/schema-identity/) — why
   `helvilette.naughtian.org/v1alpha1` rather than `apps/v1`, and what the alpha
   level promises.
-- [Othela configuration](/helvilette/reference/othela-configuration/) — the
+- [Othela configuration](/helvilette/references/othela-configuration/) — the
   `--fleet-repo` that tells Othela where to find these manifests.
 - [Diagnose a manifest that deploys
   nothing](/helvilette/how-to/diagnose-a-silent-manifest/) — the task-oriented

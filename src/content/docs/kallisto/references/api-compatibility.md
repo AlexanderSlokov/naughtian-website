@@ -46,7 +46,7 @@ Vault does.
 | `GET /v1/sys/init` | Always initialised. |
 | `GET /v1/sys/mounts` | The configured KV-v2 mount. |
 | `GET /v1/sys/internal/ui/mounts/<path>` | Mount lookup, as SDKs use to detect KV version. |
-| `GET /v1/sys/metrics` | Prometheus text format. See [metrics and logs](/kallisto/reference/metrics/). |
+| `GET /v1/sys/metrics` | Prometheus text format. See [metrics and logs](/kallisto/references/metrics/). |
 | `/v1/auth/token/lookup-self`, `/v1/auth/token/renew-self` | Answered so SDK startup succeeds. |
 
 None of these serve a secret.

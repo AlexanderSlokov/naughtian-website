@@ -35,7 +35,7 @@ and communication channels are still placeholders in the upstream repository.
 **Kallisto** - there is no network authentication, so port 8200 must stay on
 loopback, and no audit log, since the access log drops lines under load. The
 project calls 2.0.0 a prototype with no stability promise. See [project
-status](/kallisto/reference/status/).
+status](/kallisto/references/status/).
 
 ## Planned work
 
@@ -84,4 +84,4 @@ understanding before you build on it:
 
 Kallisto is AGPLv3, with commercial licensing negotiable. Helvilette is Apache
 2.0. Full detail lives in [Kuberina's licensing
-reference](/kuberina/reference/licensing/).
+reference](/kuberina/references/licensing/).

@@ -130,7 +130,7 @@ Othela is now listening on port 8080. Leave it running.
 `--state-dir` defaults to `/var/lib/helvilette/othela`, which needs root. Left
 unset, Othela warns and falls back to in-memory storage, losing every
 registration on restart. The full flag list is in [Othela
-configuration](/helvilette/reference/othela-configuration/).
+configuration](/helvilette/references/othela-configuration/).
 :::
 
 :::note[What Othela is]
@@ -224,9 +224,9 @@ firewall rule per node, and no key material sitting on a CI runner.
 
 - [Configure the agent](/helvilette/how-to/configure-the-agent/) — labels,
   polling intervals, and the three configuration mechanisms.
-- [Othela configuration](/helvilette/reference/othela-configuration/) — every
+- [Othela configuration](/helvilette/references/othela-configuration/) — every
   control plane flag, and the two directories it uses.
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — how to
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — how to
   declare what runs where.
 - [Test on real VMs with Vagrant](/helvilette/how-to/test-with-vagrant/) — two
   Debian VMs, systemd units and a Gitea server, closer to a real deployment

@@ -79,7 +79,7 @@ costs, which on the reference machine is 350 to 430 ns per request.
   an order of magnitude.
 
 The published figures are in [performance and
-footprint](/kallisto/reference/performance/).
+footprint](/kallisto/references/performance/).
 
 :::note[Older reports]
 The archive under `docs/references/benchmarks/` in the Kallisto repository

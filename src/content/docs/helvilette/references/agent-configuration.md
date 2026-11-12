@@ -189,5 +189,5 @@ Labels are reported per key as `labels.<key>`, each with its own source.
 - [Why the config file outranks the
   environment](/helvilette/explanation/config-precedence/) — the reasoning
   behind the precedence order.
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — the
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — the
   manifest whose `nodeSelector` these labels are matched against.

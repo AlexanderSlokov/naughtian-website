@@ -112,7 +112,7 @@ Either way, set `nodeID` explicitly.
 The agent logs the same resolution at startup under the message `effective
 configuration`, so you can also answer the question after the fact from a
 node's logs. See the [configuration
-reference](/helvilette/reference/agent-configuration/#inspecting-the-resolved-configuration)
+reference](/helvilette/references/agent-configuration/#inspecting-the-resolved-configuration)
 for the full vocabulary of source names.
 
 ## Choosing labels
@@ -149,12 +149,12 @@ steady load on Othela proportional to fleet size divided by interval.
 
 ## Related
 
-- [Agent configuration reference](/helvilette/reference/agent-configuration/) —
+- [Agent configuration reference](/helvilette/references/agent-configuration/) —
   every setting in table form.
 - [Why the config file outranks the
   environment](/helvilette/explanation/config-precedence/) — the reasoning
   behind the precedence order above.
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — the other
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — the other
   half of the targeting equation.
 - [Diagnose a manifest that deploys
   nothing](/helvilette/how-to/diagnose-a-silent-manifest/) — when the labels

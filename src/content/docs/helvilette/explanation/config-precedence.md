@@ -120,5 +120,5 @@ for how to use them.
 
 - [Configure the agent](/helvilette/how-to/configure-the-agent/) — the three
   mechanisms and when to reach for each.
-- [Agent configuration reference](/helvilette/reference/agent-configuration/) —
+- [Agent configuration reference](/helvilette/references/agent-configuration/) —
   every setting, and the full source-name vocabulary.

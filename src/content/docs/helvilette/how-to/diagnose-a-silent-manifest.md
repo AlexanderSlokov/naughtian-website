@@ -52,7 +52,7 @@ check the group: `helvilette.io/v1alpha1` was replaced by
 identity](/helvilette/explanation/schema-identity/#the-rule-includes-the-word-owns).
 
 See the [validation
-table](/helvilette/reference/helvilette-yml/#validation) for every condition
+table](/helvilette/references/helvilette-yml/#validation) for every condition
 that triggers a rejection.
 
 ## 2. Check the fleet repository synced
@@ -207,15 +207,15 @@ depending on a vault secret will fail to decrypt it, and the cause will not
 appear anywhere in Helvilette's own output.
 
 See [not yet
-implemented](/helvilette/reference/helvilette-yml/#not-yet-implemented).
+implemented](/helvilette/references/helvilette-yml/#not-yet-implemented).
 
 ## Related
 
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — every
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — every
   field and every validation rule.
 - [Configure the agent](/helvilette/how-to/configure-the-agent/) — setting
   labels, and confirming which configuration mechanism won.
-- [Othela configuration](/helvilette/reference/othela-configuration/) —
+- [Othela configuration](/helvilette/references/othela-configuration/) —
   `--fleet-repo`, `--fleet-branch` and where the clone lands.
 - [Schema identity](/helvilette/explanation/schema-identity/) — why the
   `apiVersion` changed, and why validation arrived with it.

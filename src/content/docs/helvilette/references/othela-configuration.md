@@ -146,9 +146,9 @@ to correct the spelling as well as the flag.
 
 ## See also
 
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — the
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — the
   manifests Othela discovers in the fleet repository.
-- [Agent configuration](/helvilette/reference/agent-configuration/) — the other
+- [Agent configuration](/helvilette/references/agent-configuration/) — the other
   half of the loop, which does have a config file and an environment layer.
 - [Run your first reconciliation
   loop](/helvilette/tutorials/quickstart/) — these flags in context.
