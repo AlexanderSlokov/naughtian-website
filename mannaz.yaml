@@ -1,0 +1,9 @@
+version: 1
+replicas:
+  - name: helvilette-mannaz
+    repository: https://github.com/AlexanderSlokov/helvilette-mannaz.git
+    branch: main
+    source: src/content/docs/helvilette-mannaz
+    target: docs
+    exclude:
+      - plans/**

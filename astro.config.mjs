@@ -105,6 +105,7 @@ export default defineConfig({
 				project({ label: 'Kuberina', dir: 'kuberina', status: 'Alpha' }),
 				project({ label: 'Helvilette', dir: 'helvilette', status: 'Alpha' }),
 				project({ label: 'Kallisto', dir: 'kallisto', status: 'Prototype' }),
+				project({ label: 'Helvilette Mannaz', dir: 'helvilette-mannaz', status: 'Alpha' }),
 				// Kalena, Kaeliir and Ginnungagap slot in here as they land.
 				{
 					label: 'Research',

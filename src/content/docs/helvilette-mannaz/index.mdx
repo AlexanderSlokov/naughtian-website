@@ -1,0 +1,54 @@
+---
+title: Helvilette Mannaz
+description: One home for the documentation of many Git repositories. The site holds every page, and each project keeps a copy of its own.
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+<p>
+	<Badge text="Alpha" variant="caution" size="medium" />
+	<Badge text="AGPLv3" variant="note" size="medium" />
+	<Badge text="Go CLI" variant="tip" size="medium" />
+</p>
+
+Helvilette Mannaz is a command-line tool that gives many separate Git repositories
+one shared home for their documentation.
+This site is that home.
+Each project still carries its own pages in its `docs/` folder, and Mannaz keeps
+those pages in step with the site.
+
+## The problem
+
+Documentation spread over many repositories and note-taking apps has no single place
+to read, review, or link across.
+Copying pages by hand between a project and a docs site works until someone forgets a
+copy, and then the two versions disagree.
+
+## How it works
+
+Mannaz uses two terms:
+
+- The _origin_ is the one repository that holds every page. It is the repository of
+  this site, `naughtian-website`.
+- A _replica_ is a project repository that receives a copy of its own pages in its
+  `docs/` folder.
+
+A file in the origin, `mannaz.yaml`, names each replica and the folders it receives.
+The `mannaz push` command copies a replica's pages from the origin, commits them to
+the replica's `mannaz/sync` branch, and opens a pull request there.
+The commit and the pull request description end with a `Mannaz-Origin-Rev` line that
+records the origin commit, so the next run knows what the replica last merged.
+
+If someone edits a replica's pages directly, the next `mannaz push` stops and lists
+each changed file, so the edit can move into the origin first.
+
+## Status
+
+Version 0.1.0 is in development.
+It pushes one replica per run, and Helvilette Mannaz is its only replica.
+Bringing edits from a replica back to the origin is planned work.
+
+## Next steps
+
+- [Push a replica](/helvilette-mannaz/how-to/push-a-replica/) shows how to bring one
+  project's pages up to date.
