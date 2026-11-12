@@ -24,7 +24,7 @@ not need a Kubernetes cluster to benefit from it.
 | `Dockerfile` | **`playbook.yml` + `roles/`** | Defines what needs to be done |
 | `values.yaml` (Helm) | **`helvilette.yml`** | Per-deployment declarative configuration |
 | Pod spec / `nodeSelector` | **`nodeGroup` / `nodeSelector`** | Declares what runs where |
-| `livenessProbe` | **`livenessProbe`** *(planned)* | Identical concept, applied to systemd services. Declared in example manifests but [not yet parsed](/helvilette/reference/helvilette-yml/#not-yet-implemented) |
+| `livenessProbe` | **`livenessProbe`** *(planned)* | Identical concept, applied to systemd services. Declared in example manifests but [not yet parsed](/helvilette/references/helvilette-yml/#not-yet-implemented) |
 | Container runtime | **Ansible engine** | The actual executor |
 | `etcd` | **SQLite / Git** | State storage |
 
@@ -43,7 +43,7 @@ repository named by `--fleet-repo`, re-pulls it on a timer, and scans the clone
 for `helvilette.yml` manifests. There is no local manifest directory and no API
 for pushing a declaration in, so the state of the fleet is whatever the fleet
 repository says it is, and changing it means a commit. See [Othela
-configuration](/helvilette/reference/othela-configuration/).
+configuration](/helvilette/references/othela-configuration/).
 
 Note the two repositories this implies. The fleet repository holds manifests
 and is read by Othela. The playbook repository named in each manifest's

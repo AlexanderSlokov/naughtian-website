@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { existsSync } from 'node:fs';
 
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
@@ -25,9 +26,13 @@ function project({ label, dir, status }) {
 	for (const [heading, directory] of [
 		['Tutorials', 'tutorials'],
 		['How-to guides', 'how-to'],
-		['Reference', 'reference'],
+		['Reference', 'references'],
 		['Explanation', 'explanation'],
 	]) {
+		// A project that has no pages of one kind yet gets no empty group.
+		if (!existsSync(new URL(`./src/content/docs/${dir}/${directory}`, import.meta.url))) {
+			continue;
+		}
 		sections.push({
 			label: heading,
 			items: [{ autogenerate: { directory: `${dir}/${directory}` } }],
@@ -44,6 +49,26 @@ function project({ label, dir, status }) {
 
 // https://astro.build/config
 export default defineConfig({
+	// The reference folders became `references/` to match the project
+	// repositories (Helvilette Mannaz plan, Stage 6). Old links keep working.
+	// Each page needs its own entry: a dynamic redirect must target a route
+	// with the same parameter, and Starlight serves every page from one
+	// root-level [...slug] route.
+	redirects: {
+		'/helvilette/reference/agent-configuration/': '/helvilette/references/agent-configuration/',
+		'/helvilette/reference/helvilette-yml/': '/helvilette/references/helvilette-yml/',
+		'/helvilette/reference/othela-configuration/': '/helvilette/references/othela-configuration/',
+		'/kallisto/reference/api-compatibility/': '/kallisto/references/api-compatibility/',
+		'/kallisto/reference/configuration/': '/kallisto/references/configuration/',
+		'/kallisto/reference/kallisto-ctl/': '/kallisto/references/kallisto-ctl/',
+		'/kallisto/reference/metrics/': '/kallisto/references/metrics/',
+		'/kallisto/reference/performance/': '/kallisto/references/performance/',
+		'/kallisto/reference/sealed-file/': '/kallisto/references/sealed-file/',
+		'/kallisto/reference/status/': '/kallisto/references/status/',
+		'/kuberina/reference/cli/': '/kuberina/references/cli/',
+		'/kuberina/reference/licensing/': '/kuberina/references/licensing/',
+		'/kuberina/reference/make-targets/': '/kuberina/references/make-targets/',
+	},
 	markdown: {
 		remarkPlugins: [remarkMath],
 		rehypePlugins: [rehypeMathjax],
@@ -85,6 +110,7 @@ export default defineConfig({
 				project({ label: 'Kuberina', dir: 'kuberina', status: 'Alpha' }),
 				project({ label: 'Helvilette', dir: 'helvilette', status: 'Alpha' }),
 				project({ label: 'Kallisto', dir: 'kallisto', status: 'Prototype' }),
+				project({ label: 'Helvilette Mannaz', dir: 'helvilette-mannaz', status: 'Alpha' }),
 				// Kalena, Kaeliir and Ginnungagap slot in here as they land.
 				{
 					label: 'Research',

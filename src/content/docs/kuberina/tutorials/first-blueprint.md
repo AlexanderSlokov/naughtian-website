@@ -146,6 +146,6 @@ the result.
 
 - [Running the solver](/kuberina/how-to/build-and-run/) — the same operations
   as a task-oriented reference rather than a walkthrough.
-- [CLI reference](/kuberina/reference/cli/) — every flag the solver accepts.
+- [CLI reference](/kuberina/references/cli/) — every flag the solver accepts.
 - [Why offline scheduling](/kuberina/explanation/offline-scheduling/) — the
   reasoning behind planning placement in advance.

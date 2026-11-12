@@ -126,7 +126,7 @@ sudo journalctl -u helvi-agent -f
 ```
 
 The manifest Othela loads is a normal
-[`helvilette.yml`](/helvilette/reference/helvilette-yml/), and every failure
+[`helvilette.yml`](/helvilette/references/helvilette-yml/), and every failure
 mode in [diagnose a manifest that deploys
 nothing](/helvilette/how-to/diagnose-a-silent-manifest/) applies unchanged.
 The one difference from a local run is that both processes are under systemd,
@@ -151,7 +151,7 @@ compare a second run against.
 
 - [Run the E2E suite](/helvilette/how-to/run-e2e-tests/) — the containerised
   harness, faster and sufficient for most changes.
-- [Othela configuration](/helvilette/reference/othela-configuration/) — the
+- [Othela configuration](/helvilette/references/othela-configuration/) — the
   flags in `othela.service`.
-- [Agent configuration](/helvilette/reference/agent-configuration/) — labels,
+- [Agent configuration](/helvilette/references/agent-configuration/) — labels,
   identity, and the config file the systemd unit could use instead of flags.

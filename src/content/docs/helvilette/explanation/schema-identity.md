@@ -112,7 +112,7 @@ earned.
 
 `v1alpha1` states the true situation and leaves room for those sections to land
 without breaking anyone. The [reference
-page](/helvilette/reference/helvilette-yml/#not-yet-implemented) lists exactly
+page](/helvilette/references/helvilette-yml/#not-yet-implemented) lists exactly
 what is not yet real.
 
 ## The kind should name the thing
@@ -175,7 +175,7 @@ possible way to discover a schema change.
 
 ## Related
 
-- [helvilette.yml reference](/helvilette/reference/helvilette-yml/) — every
+- [helvilette.yml reference](/helvilette/references/helvilette-yml/) — every
   field, what is required, and what is not yet implemented.
 - [Diagnose a manifest that deploys
   nothing](/helvilette/how-to/diagnose-a-silent-manifest/) — what to do when a

@@ -130,4 +130,4 @@ prints what the server would do. An unknown or misspelled field is an error.
 Run it in CI before deploying a configuration change.
 
 Every field is listed in the [configuration
-reference](/kallisto/reference/configuration/).
+reference](/kallisto/references/configuration/).

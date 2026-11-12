@@ -40,7 +40,7 @@ plaintext out of application memory for as long as possible, and makes a
 rotation take effect without a restart. Against a central Vault that costs a
 network round trip per use. Against Kallisto it is a loopback call answered
 from RAM, at latencies around a millisecond. See [performance and
-footprint](/kallisto/reference/performance/).
+footprint](/kallisto/references/performance/).
 
 ### Edge and unreliable links
 
@@ -109,7 +109,7 @@ Each machine's Kallisto polls that file.
   values from a file.
 - **You need an audit trail of reads.** The access log is best-effort.
 - **You need something production-grade today.** 2.0.0 is a prototype. See
-  [project status](/kallisto/reference/status/).
+  [project status](/kallisto/references/status/).
 - **Callers are on other machines.** Kallisto serves loopback only and has no
   network authentication. Run one per machine.
 - **Your reads are rare and Vault is comfortable.** A handful of reads at boot
