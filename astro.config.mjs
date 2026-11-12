@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { existsSync } from 'node:fs';
 
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
@@ -28,6 +29,10 @@ function project({ label, dir, status }) {
 		['Reference', 'references'],
 		['Explanation', 'explanation'],
 	]) {
+		// A project that has no pages of one kind yet gets no empty group.
+		if (!existsSync(new URL(`./src/content/docs/${dir}/${directory}`, import.meta.url))) {
+			continue;
+		}
 		sections.push({
 			label: heading,
 			items: [{ autogenerate: { directory: `${dir}/${directory}` } }],
