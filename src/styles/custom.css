@@ -74,3 +74,80 @@ mjx-container[display='true'] {
 .sl-markdown-content pre code {
 	white-space: pre;
 }
+
+/* ---------------------------------------------------------------------------
+   Homepage hero: Helvilette as a dim ASCII backdrop
+   (public/helvilette/helvilette-ascii.js)
+   --------------------------------------------------------------------------- */
+
+.hero:has(helvilette-ascii) {
+	position: relative;
+	isolation: isolate;
+}
+
+/* Take the artwork out of the grid and spread it behind the whole hero. */
+.hero > .hero-html:has(helvilette-ascii) {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	width: auto;
+	margin: 0;
+	pointer-events: none;
+}
+
+helvilette-ascii {
+	/* Where her face lands in the box, and how large the artwork is drawn. */
+	--anchor-x: 0.5;
+	--anchor-y: 0.22;
+	--zoom: 1;
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	/* Phones: the cat sits above the title and fades out behind the text. */
+	mask-image: linear-gradient(to bottom, #000 0%, #000 36%, transparent 62%);
+}
+
+helvilette-ascii canvas {
+	display: block;
+}
+
+/* Static fallback until the script takes over, or if it never does. */
+helvilette-ascii img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 54% 30%;
+	opacity: 0.45;
+}
+
+helvilette-ascii.is-live img {
+	display: none;
+}
+
+@media (max-width: 49.99rem) {
+	.hero:has(helvilette-ascii) {
+		padding-top: min(62vw, 20rem);
+	}
+}
+
+@media (min-width: 50rem) {
+	.hero:has(helvilette-ascii) {
+		grid-template-columns: 3fr 2fr;
+		min-height: min(78vh, 46rem);
+	}
+
+	helvilette-ascii {
+		--anchor-x: 0.72;
+		--anchor-y: 0.47;
+		--zoom: 1;
+		/* Fade toward the text on the left and soften every other edge. */
+		mask-image:
+			linear-gradient(to right, transparent 0%, rgb(0 0 0 / 30%) 30%, #000 60%, #000 86%, transparent 100%),
+			linear-gradient(to bottom, transparent 0%, #000 12%, #000 86%, transparent 100%);
+		mask-composite: intersect;
+	}
+
+	helvilette-ascii img {
+		object-position: 54% 50%;
+	}
+}

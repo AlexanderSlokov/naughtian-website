@@ -2,10 +2,15 @@
 title: Naughtian
 description: Infrastructure tools for the lone operator. Small enough to audit in a day, with no consensus to babysit, and nothing held hostage when you walk away.
 template: splash
+head:
+  - tag: script
+    attrs:
+      type: module
+      src: /helvilette/helvilette-ascii.js
 hero:
   tagline: Your operational pain is real, and a lone operator deserves a real answer. Tools small enough to audit in a day, with no consensus to babysit, that leave your infrastructure intact the day you walk away.
   image:
-    file: ../../assets/helvilette.webp
+    html: '<helvilette-ascii><img src="/helvilette/helvilette-source.webp" alt="" width="1280" height="768" /></helvilette-ascii>'
   actions:
     - text: Read the letter from Naught
       link: /ecosystem/the-letter-from-naught/
